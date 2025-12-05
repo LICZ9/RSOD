@@ -1,0 +1,8 @@
+# 训练
+python tools/train.py projects/MixPL/configs/mixpl_faster-rcnn_r50_fpn_100_sonar-s1-p10.py
+
+# 评估模型
+python tools/test.py projects/MixPL/configs/mixpl_faster-rcnn_r50_fpn_100_sonar-s1-p10.py work_dirs/my_config/latest.pth --eval bbox
+
+# 保存测试结果
+python tools/test.py projects/MixPL/configs/mixpl_faster-rcnn_r50_fpn_100_sonar-s1-p10.py work_dirs/my_config/latest.pth --format-only --options "jsonfile_prefix=work_dirs/test_results"
