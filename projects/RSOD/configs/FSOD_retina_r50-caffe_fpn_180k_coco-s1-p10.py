@@ -1,6 +1,6 @@
 _base_ = [
-    'mmdet::_base_/models/faster-rcnn_r50_fpn.py', 'mmdet::_base_/default_runtime.py',
-    'rsod_coco_detection.py'
+    'mmdet::_base_/models/retinanet_r50_fpn.py', 'mmdet::_base_/default_runtime.py',
+    'FSOD_coco_detection.py'
 ]
 
 custom_imports = dict(
@@ -24,7 +24,7 @@ detector.backbone = dict(
     style='caffe',
     init_cfg=dict(
         type='Pretrained',
-        checkpoint='../ckpt/resnet50_msra-5891d200.pth'))
+        checkpoint='ckpt/resnet50_msra-5891d200.pth'))
 
 model = dict(
     _delete_=True,
@@ -45,7 +45,7 @@ model = dict(
         erase_patches=(1, 20),
         erase_ratio=(0, 0.1),
         erase_thr=0.7,
-        cls_pseudo_thr=0.7,
+        cls_pseudo_thr=0.4,
         freeze_teacher=True,
         sup_weight=1.0,
         unsup_weight=2.0,
@@ -68,7 +68,7 @@ train_dataloader = dict(
 
 # training schedule for 180k
 train_cfg = dict(
-    type='IterBasedTrainLoop', max_iters=180000, val_interval=50)
+    type='IterBasedTrainLoop', max_iters=180000, val_interval=5000)
 val_cfg = dict(type='TeacherStudentValLoop')
 test_cfg = dict(type='TestLoop')
 
@@ -85,6 +85,8 @@ optim_wrapper = dict(
     clip_grad=dict(max_norm=20, norm_type=2)
 )
 
+default_hooks = dict(
+    checkpoint=dict(by_epoch=False, interval=10000, max_keep_ckpts=1))
 log_processor = dict(by_epoch=False)
 custom_hooks = [dict(type='MeanTeacherHook', momentum=0.0002, gamma=4)]
-resume = True
+resume=True

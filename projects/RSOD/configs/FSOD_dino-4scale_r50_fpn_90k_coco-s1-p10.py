@@ -1,5 +1,5 @@
 _base_ = [
-    'mmdet::_base_/default_runtime.py', 'rsod_coco_detection.py'
+    'mmdet::_base_/default_runtime.py', 'FSOD_coco_detection.py'
 ]
 
 custom_imports = dict(

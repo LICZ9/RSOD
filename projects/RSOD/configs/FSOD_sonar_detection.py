@@ -20,8 +20,8 @@ backend_args = None
 
 metainfo = {
     'classes':
-        ("human body", "ball", "plane", "rov", "cube", "cylinder", "square cage", "tyre",
-         "circle cage", "metal bucket"),
+        ("Block", "Circle Cage", "Steel Frame","Concrete Column", "Steel Plate", "Pot", "SquareCage", "Tire",
+         "Underwater Robot", "Diver"),
     # palette is a list of color tuples, which is used for visualization.
     'palette':
         [(220, 20, 60), (119, 11, 32), (0, 0, 142), (0, 0, 230), (106, 0, 228),

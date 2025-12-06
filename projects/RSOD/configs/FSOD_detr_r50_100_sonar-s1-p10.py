@@ -10,7 +10,7 @@ custom_imports = dict(
 
 _base_ = [
     '../../../configs/_base_/default_runtime.py',
-    'rsod_sonar_detection.py'
+    'FSOD_sonar_detection.py'
 ]
 
 # DETR detector configuration

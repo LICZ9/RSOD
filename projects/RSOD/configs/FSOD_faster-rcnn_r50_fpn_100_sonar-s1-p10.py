@@ -9,7 +9,7 @@ custom_imports = dict(
 
 _base_ = [
     '../../../configs/_base_/models/faster-rcnn_r50_fpn.py', '../../../configs/_base_/default_runtime.py',
-    'rsod_sonar_detection.py'
+    'FSOD_sonar_detection.py'
 ]
 
 
