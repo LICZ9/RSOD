@@ -1,17 +1,6 @@
 dataset_type = 'CocoDataset'
 data_root = 'PATH_TO_ROOT_DATASET'
 
-
-
-# data_root = 's3://openmmlab/datasets/detection/coco/'
-
-# Method 2: Use `backend_args`, `file_client_args` in versions before 3.0.0rc6
-# backend_args = dict(
-#     backend='petrel',
-#     path_mapping=dict({
-#         './data/': 's3://openmmlab/datasets/detection/',
-#         'data/': 's3://openmmlab/datasets/detection/'
-#     }))
 backend_args = None
 
 train_pipeline = [
@@ -59,7 +48,21 @@ val_dataloader = dict(
         test_mode=True,
         pipeline=test_pipeline,
         backend_args=backend_args))
-test_dataloader = val_dataloader
+test_dataloader = dict(
+    batch_size=1,
+    num_workers=1,
+    persistent_workers=True,
+    drop_last=False,
+    sampler=dict(type='DefaultSampler', shuffle=False),
+    dataset=dict(
+        type=dataset_type,
+        data_root=data_root,
+        metainfo=metainfo,
+        ann_file='annotations/instances_test.json',
+        data_prefix=dict(img='test/'),
+        test_mode=True,
+        pipeline=test_pipeline,
+        backend_args=backend_args))
 
 val_evaluator = dict(
     type='CocoMetric',
@@ -67,6 +70,10 @@ val_evaluator = dict(
     metric='bbox',
     format_only=False,
     backend_args=backend_args)
-test_evaluator = val_evaluator
+test_evaluator = dict(
+    type='CocoMetric',
+    ann_file=data_root + 'annotations/instances_test.json',
+    metric='bbox',
+    format_only=False)
 
 

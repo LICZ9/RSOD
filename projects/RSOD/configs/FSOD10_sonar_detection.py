@@ -2,17 +2,6 @@
 dataset_type = 'CocoDataset'
 data_root = 'ROOT_PATH_OF_DATASET'
 
-
-
-# data_root = 's3://openmmlab/datasets/detection/coco/'
-
-# Method 2: Use `backend_args`, `file_client_args` in versions before 3.0.0rc6
-# backend_args = dict(
-#     backend='petrel',
-#     path_mapping=dict({
-#         './data/': 's3://openmmlab/datasets/detection/',
-#         'data/': 's3://openmmlab/datasets/detection/'
-#     }))
 backend_args = None
 
 
@@ -20,10 +9,6 @@ metainfo = {
     'classes':
         ("Block", "Circle Cage", "Steel Frame","Concrete Column", "Steel Plate", "Pot", "SquareCage", "Tire",
          "Underwater Robot", "Diver"),
-    # palette is a list of color tuples, which is used for visualization.
-    'palette':
-        [(220, 20, 60), (119, 11, 32), (0, 0, 142), (0, 0, 230), (106, 0, 228),
-         (0, 60, 100), (0, 80, 100), (0, 0, 70), (0, 0, 192), (250, 170, 30)]
 }
 
 color_space = [
@@ -49,8 +34,6 @@ geometric = [
 scale = [(1333, 400), (1333, 1200)]
 
 branch_field = ['sup', 'unsup_teacher', 'unsup_student']
-# pipeline used to augment labeled data,
-# which will be sent to student model for supervised training.
 sup_pipeline = [
     dict(type='LoadImageFromFile'),
     dict(type='LoadAnnotations', with_bbox=True),
@@ -121,19 +104,6 @@ test_pipeline = [
 
 batch_size = 4
 num_workers = 4
-# There are two common semi-supervised learning settings on the coco dataset：
-# (1) Divide the train2017 into labeled and unlabeled datasets
-# by a fixed percentage, such as 1%, 2%, 5% and 10%.
-# The format of labeled_ann_file and unlabeled_ann_file are
-# instances_train2017.{fold}@{percent}.json, and
-# instances_train2017.{fold}@{percent}-unlabeled.json
-# `fold` is used for cross-validation, and `percent` represents
-# the proportion of labeled data in the train2017.
-# (2) Choose the train2017 as the labeled dataset
-# and unlabeled2017 as the unlabeled dataset.
-# The labeled_ann_file and unlabeled_ann_file are
-# instances_train2017.json and image_info_unlabeled2017.json
-# We use this configuration by default.
 labeled_dataset = dict(
     type=dataset_type,
     data_root=data_root,
@@ -179,11 +149,29 @@ val_dataloader = dict(
         pipeline=test_pipeline,
         backend_args=backend_args))
 
-test_dataloader = val_dataloader
+test_dataloader = dict(
+    batch_size=1,
+    num_workers=1,
+    persistent_workers=True,
+    drop_last=False,
+    sampler=dict(type='DefaultSampler', shuffle=False),
+    dataset=dict(
+        type=dataset_type,
+        data_root=data_root,
+        metainfo=metainfo,
+        ann_file='annotations/instances_test.json',
+        data_prefix=dict(img='test/'),
+        test_mode=True,
+        pipeline=test_pipeline,
+        backend_args=backend_args))
 
 val_evaluator = dict(
     type='CocoMetric',
     ann_file=data_root + 'annotations/instances_val.json',
     metric='bbox',
     format_only=False)
-test_evaluator = val_evaluator
+test_evaluator = dict(
+    type='CocoMetric',
+    ann_file=data_root + 'annotations/instances_test.json',
+    metric='bbox',
+    format_only=False)
