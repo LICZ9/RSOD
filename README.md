@@ -13,7 +13,8 @@ mim install "mmcv==2.1.0"
 ```
 
 ### Dataset
-Download [FSOD](https://pan.baidu.com/s/10nJoimVv_8gENv-yZyfMEA?pwd=0516) datasets
+Download [FSOD](https://pan.baidu.com/s/1p9Vm_Gr8nCVnC7KG6vB0Fg?pwd=0516) datasets
+>**Dataset updata (May 2026):** We have released an updatad version of the FSOD dataset with refined annotations. Please use the latest version provided in the download link above.
 
 Please ensure that the dataset meets the following folder structure:
 
