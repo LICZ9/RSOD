@@ -50,3 +50,22 @@ python tools/test.py projects/RSOD/configs/FSOD10_faster-rcnn_r50_fpn_100_sonar-
 # Get the test result indicators 
 
 ```
+
+## Citation
+
+If you find this project useful, please consider citing:
+```bash
+@inproceedings{li2026rsod,
+  title     = {RSOD: Reliability-Guided Sonar Image Object Detection with Extremely Limited Labels},
+  author    = {Li, Chengzhou and Guo, Ping and Meng, Guanchen and Jia, Qi and Liu, Jinyuan and Liu, Zhu and Liu, Xiaokang and Liu, Yu and Luo, Zhongxuan and Fan, Xin},
+  booktitle = {Proceedings of the {AAAI} Conference on Artificial Intelligence},
+  volume    = {40},
+  number    = {8},
+  pages     = {6055--6063},
+  year      = {2026},
+  month     = {mar},
+  publisher = {{AAAI} Press},
+  doi       = {10.1609/aaai.v40i8.37529},
+  url       = {https://doi.org/10.1609/aaai.v40i8.37529}
+}
+```
