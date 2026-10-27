@@ -12,32 +12,6 @@ mim install mmengine==0.10.6
 mim install "mmcv==2.1.0"
 ```
 
-### Dataset
-Download [FSOD]( https://pan.baidu.com/s/1VQGnJ9X4Kv9MDtRUgTISvw?pwd=0516) datasets
->**Dataset updata (May 2026):** We have released an updatad version of the FSOD dataset with refined annotations. Please use the latest version provided in the download link above.
-
-Please ensure that the dataset meets the following folder structure:
-
-```
-$HOME/datasets/
-├── FSOD
-│ ├── train
-│ │ ├── 00001.jpg
-│ │ ├── 00002.jpg
-...
-│ ├── val
-│ │ ├── 00001.jpg
-│ │ ├── 00002.jpg
-...
-│ ├── test
-│ │ ├── 00001.jpg
-│ │ ├── 00002.jpg
-...
-│ ├── annotations
-│ │ ├── instances_train.json
-│ │ ├── instances_val.json
-│ │ ├── instances_test.json
-```
 ## Train
 Run the following sample instructions for training：
 ```
