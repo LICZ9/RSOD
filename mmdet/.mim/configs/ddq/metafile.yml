@@ -33,7 +33,7 @@ Models:
 
   - Name: ddq-detr-5scale_r50_8xb2-12e_coco
     In Collection: DDQ
-    Config: configs/dino/ddq-detr-5scale_r50_8xb2-12e_coco.py
+    Config: configs/ddq/ddq-detr-5scale_r50_8xb2-12e_coco.py
     Metadata:
       Epochs: 12
     Results:
@@ -45,7 +45,7 @@ Models:
 
   - Name: ddq-detr-4scale_swinl_8xb2-30e_coco
     In Collection: DDQ
-    Config: configs/dino/ddq-detr-4scale_swinl_8xb2-30e_coco.py
+    Config: configs/ddq/ddq-detr-4scale_swinl_8xb2-30e_coco.py
     Metadata:
       Epochs: 12
     Results:

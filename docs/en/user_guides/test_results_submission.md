@@ -54,7 +54,7 @@ To do inference on coco test-dev, we should update the setting of `test_datalode
 
 #### Update them in config file
 
-The relevant settings are provided at the end of `configs/_base_/datasets/coco_panoptic.py`, as below.
+The relevant settings are provided at the end of `mmdet/.mim/configs/_base_/datasets/coco_panoptic.py`, as below.
 
 ```python
 test_dataloader = dict(
@@ -79,7 +79,7 @@ test_evaluator = dict(
 
 Any of the following way can be used to update the setting for inference on coco test-dev set.
 
-Case 1: Directly uncomment the setting in `configs/_base_/datasets/coco_panoptic.py`.
+Case 1: Directly uncomment the setting in `mmdet/.mim/configs/_base_/datasets/coco_panoptic.py`.
 
 Case 2: Copy the following setting to the config file you used now.
 
@@ -154,7 +154,7 @@ Suppose we perform inference on `test2017` using pretrained MaskFormer with ResN
 ```shell
 # test with single gpu
 CUDA_VISIBLE_DEVICES=0 python tools/test.py \
-    configs/maskformer/maskformer_r50_mstrain_16x1_75e_coco.py \
+    mmdet/.mim/configs/maskformer/maskformer_r50_ms-16xb1-75e_coco.py \
     checkpoints/maskformer_r50_mstrain_16x1_75e_coco_20220221_141956-bc2699cb.pth \
     --cfg-options \
     test_dataloader.dataset.ann_file=annotations/panoptic_image_info_test-dev2017.json \

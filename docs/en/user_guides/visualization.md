@@ -65,7 +65,7 @@ The following table shows the parameters supported by `DetVisualizationHook`.
 |  interval  | Controls how much iteration to store or display the results of a val or test if VisualizationHook is enabled. |
 |    show    |                           Controls whether to visualize the results of val or test.                           |
 
-If you want to enable `DetVisualizationHook` related functions and configurations during training or testing, you only need to modify the configuration, take `configs/rtmdet/rtmdet_tiny_8xb32-300e_coco.py` as an example, draw annotations and predictions at the same time, and display the images, the configuration can be modified as follows
+If you want to enable `DetVisualizationHook` related functions and configurations during training or testing, you only need to modify the configuration, take `mmdet/.mim/configs/rtmdet/rtmdet_tiny_8xb32-300e_coco.py` as an example, draw annotations and predictions at the same time, and display the images, the configuration can be modified as follows
 
 ```Python
 visualization = _base_.default_hooks.visualization
@@ -80,10 +80,10 @@ The `test.py` procedure is further simplified by providing the  `--show` and `--
 
 ```Shell
 # Show test results
-python tools/test.py configs/rtmdet/rtmdet_tiny_8xb32-300e_coco.py https://download.openmmlab.com/mmdetection/v3.0/rtmdet/rtmdet_tiny_8xb32-300e_coco/rtmdet_tiny_8xb32-300e_coco_20220902_112414-78e30dcc.pth --show
+python tools/test.py mmdet/.mim/configs/rtmdet/rtmdet_tiny_8xb32-300e_coco.py https://download.openmmlab.com/mmdetection/v3.0/rtmdet/rtmdet_tiny_8xb32-300e_coco/rtmdet_tiny_8xb32-300e_coco_20220902_112414-78e30dcc.pth --show
 
 # Specify where to store the prediction results
-python tools/test.py configs/rtmdet/rtmdet_tiny_8xb32-300e_coco.py https://download.openmmlab.com/mmdetection/v3.0/rtmdet/rtmdet_tiny_8xb32-300e_coco/rtmdet_tiny_8xb32-300e_coco_20220902_112414-78e30dcc.pth --show-dir imgs/
+python tools/test.py mmdet/.mim/configs/rtmdet/rtmdet_tiny_8xb32-300e_coco.py https://download.openmmlab.com/mmdetection/v3.0/rtmdet/rtmdet_tiny_8xb32-300e_coco/rtmdet_tiny_8xb32-300e_coco_20220902_112414-78e30dcc.pth --show-dir imgs/
 ```
 
 <div align=center>

@@ -38,7 +38,7 @@ CUDA_VISIBLE_DEVICES=-1 python tools/train.py ${CONFIG_FILE} [optional arguments
 在 CPU 上训练 MOT 模型 QDTrack 的示例：
 
 ```shell 脚本
-CUDA_VISIBLE_DEVICES=-1 python tools/train.py configs/qdtrack/qdtrack_faster-rcnn_r50_fpn_8xb2-4e_mot17halftrain_test-mot17halfval.py
+CUDA_VISIBLE_DEVICES=-1 python tools/train.py mmdet/.mim/configs/qdtrack/qdtrack_faster-rcnn_r50_fpn_8xb2-4e_mot17halftrain_test-mot17halfval.py
 ```
 
 #### 2. 在单 GPU 上训练
@@ -54,7 +54,7 @@ python tools/train.py ${CONFIG_FILE} [optional arguments]
 在单 GPU 上训练 MOT 模型 QDTrack 的示例：
 
 ```shell 脚本
-CUDA_VISIBLE_DEVICES=2 python tools/train.py configs/qdtrack/qdtrack_faster-rcnn_r50_fpn_8xb2-4e_mot17halftrain_test-mot17halfval.py
+CUDA_VISIBLE_DEVICES=2 python tools/train.py mmdet/.mim/configs/qdtrack/qdtrack_faster-rcnn_r50_fpn_8xb2-4e_mot17halftrain_test-mot17halfval.py
 ```
 
 #### 3. 在单节点多 GPU 上进行训练
@@ -80,7 +80,7 @@ CUDA_VISIBLE_DEVICES=4,5,6,7 PORT=29501 ./tools/dist_train.sh ${CONFIG_FILE} 4
 在单节点多 GPU 上训练 MOT 模型 QDTrack 的示例：
 
 ```shell脚本
-bash ./tools/dist_train.sh configs/qdtrack/qdtrack_faster-rcnn_r50_fpn_8xb2-4e_mot17halftrain_test-mot17halfval.py 8
+bash ./tools/dist_train.sh mmdet/.mim/configs/qdtrack/qdtrack_faster-rcnn_r50_fpn_8xb2-4e_mot17halftrain_test-mot17halfval.py 8
 ```
 
 #### 4. 在多个节点上训练
@@ -122,7 +122,7 @@ SRUN_ARGS="--quotatype=reserved" \
 bash ./tools/slurm_train.sh \
 mypartition \
 mottrack
-configs/qdtrack/qdtrack_faster-rcnn_r50_fpn_8xb2-4e_mot17halftrain_test-mot17halfval.py
+mmdet/.mim/configs/qdtrack/qdtrack_faster-rcnn_r50_fpn_8xb2-4e_mot17halftrain_test-mot17halfval.py
 ./work_dirs/QDTrack \
 8
 ```
@@ -168,7 +168,7 @@ CUDA_VISIBLE_DEVICES=-1 python tools/test_tracking.py ${CONFIG_FILE} [optional a
 在 CPU 上测试 MOT 模型 SORT 的示例：
 
 ```shell 脚本
-CUDA_VISIBLE_DEVICES=-1 python tools/test_tracking.py configs/sort/sort_faster-rcnn_r50_fpn_8xb2-4e_mot17halftrain_test-mot17halfval.py --detector ${CHECKPOINT_FILE}
+CUDA_VISIBLE_DEVICES=-1 python tools/test_tracking.py mmdet/.mim/configs/sort/sort_faster-rcnn_r50_fpn_8xb2-4e_mot17halftrain_test-mot17halfval.py --detector ${CHECKPOINT_FILE}
 ```
 
 #### 2. 在单 GPU 上测试
@@ -184,7 +184,7 @@ python tools/test_tracking.py ${CONFIG_FILE} [optional arguments]
 在单 GPU 上测试 MOT 模型 QDTrack 的示例：
 
 ```shell 脚本
-CUDA_VISIBLE_DEVICES=2 python tools/test_tracking.py configs/qdtrack/qdtrack_faster-rcnn_r50_fpn_8xb2-4e_mot17halftrain_test-mot17halfval.py --detector ${CHECKPOINT_FILE}
+CUDA_VISIBLE_DEVICES=2 python tools/test_tracking.py mmdet/.mim/configs/qdtrack/qdtrack_faster-rcnn_r50_fpn_8xb2-4e_mot17halftrain_test-mot17halfval.py --detector ${CHECKPOINT_FILE}
 ```
 
 #### 3. 在单节点多 GPU 上进行测试
@@ -199,7 +199,7 @@ bash ./tools/dist_test_tracking.sh ${CONFIG_FILE} ${GPU_NUM} [optional arguments
 在单节点多 GPU 上测试 MOT 模型 DeepSort 的示例：
 
 ```shell 脚本
-bash ./tools/dist_test_tracking.sh configs/qdtrack/qdtrack_faster-rcnn_r50_fpn_8xb2-4e_mot17halftrain_test-mot17halfval.py 8 --detector ${CHECKPOINT_FILE} --reid ${CHECKPOINT_FILE}
+bash ./tools/dist_test_tracking.sh mmdet/.mim/configs/qdtrack/qdtrack_faster-rcnn_r50_fpn_8xb2-4e_mot17halftrain_test-mot17halfval.py 8 --detector ${CHECKPOINT_FILE} --reid ${CHECKPOINT_FILE}
 ```
 
 #### 4. 在多个节点上测试
@@ -224,6 +224,6 @@ GPUS=8
 bash tools/slurm_test_tracking.sh \
 mypartition \
 vis \
-configs/mask2former_vis/mask2former_r50_8xb2-8e_youtubevis2021.py \
+mmdet/.mim/configs/mask2former_vis/mask2former_r50_8xb2-8e_youtubevis2021.py \
 --checkpoint ${CHECKPOINT_FILE}
 ```

@@ -9,7 +9,7 @@
 该脚本能够使用多任务跟踪或者视频实例分割方法来推理一段输入的视频/一张图片。
 
 ```shell
-python demo/mot_demo.py \
+python mmdet/.mim/demo/mot_demo.py \
     ${INPUTS}
     ${CONFIG_FILE} \
     [--checkpoint ${CHECKPOINT_FILE}] \
@@ -39,17 +39,17 @@ python demo/mot_demo.py \
 
 ```shell
 # 示例 1：不指定 --checkpoint 使用 --detector
-python demo/mot_demo.py \
-    demo/demo_mot.mp4 \
-    configs/sort/sort_faster-rcnn_r50_fpn_8xb2-4e_mot17halftrain_test-mot17halfval.py \
+python mmdet/.mim/demo/mot_demo.py \
+    mmdet/.mim/demo/demo_mot.mp4 \
+    mmdet/.mim/configs/sort/sort_faster-rcnn_r50_fpn_8xb2-4e_mot17halftrain_test-mot17halfval.py \
     --detector \
     https://download.openmmlab.com/mmtracking/mot/faster_rcnn/faster-rcnn_r50_fpn_4e_mot17-half-64ee2ed4.pth \
     --out mot.mp4
 
 # 示例 2：使用 --checkpoint
-python demo/mot_demo.py \
-    demo/demo_mot.mp4 \
-    configs/qdtrack/qdtrack_faster-rcnn_r50_fpn_8xb2-4e_mot17halftrain_test-mot17halfval.py \
+python mmdet/.mim/demo/mot_demo.py \
+    mmdet/.mim/demo/demo_mot.mp4 \
+    mmdet/.mim/configs/qdtrack/qdtrack_faster-rcnn_r50_fpn_8xb2-4e_mot17halftrain_test-mot17halfval.py \
     --checkpoint https://download.openmmlab.com/mmtracking/mot/qdtrack/mot_dataset/qdtrack_faster-rcnn_r50_fpn_4e_mot17_20220315_145635-76f295ef.pth \
     --out mot.mp4
 ```

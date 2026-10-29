@@ -41,7 +41,7 @@ All the aforementioned models are trained with a single GPU. It typically takes 
 
 ```Shell
 # Trains using the resnet-101 backbone with a batch size of 8 on a single GPU.
-./tools/dist_train.sh configs/yolact/yolact_r101.py 1
+./tools/dist_train.sh mmdet/.mim/configs/yolact/yolact_r101_1xb8-55e_coco.py 1
 ```
 
 ## Testing

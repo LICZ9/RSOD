@@ -31,11 +31,11 @@ Take [Faster R-CNN](https://github.com/open-mmlab/mmdetection/blob/main/configs/
 from mmdeploy.apis import torch2onnx
 from mmdeploy.backend.sdk.export_info import export2SDK
 
-img = 'demo/demo.jpg'
+img = 'mmdet/.mim/demo/demo.jpg'
 work_dir = 'mmdeploy_models/mmdet/onnx'
 save_file = 'end2end.onnx'
 deploy_cfg = '../mmdeploy/configs/mmdet/detection/detection_onnxruntime_dynamic.py'
-model_cfg = 'configs/faster_rcnn/faster-rcnn_r50_fpn_1x_coco.py'
+model_cfg = 'mmdet/.mim/configs/faster_rcnn/faster-rcnn_r50_fpn_1x_coco.py'
 model_checkpoint = 'faster_rcnn_r50_fpn_1x_coco_20200130-047c8118.pth'
 device = 'cpu'
 
@@ -109,10 +109,10 @@ from mmdeploy.utils import get_input_shape, load_config
 import torch
 
 deploy_cfg = '../mmdeploy/configs/mmdet/detection/detection_onnxruntime_dynamic.py'
-model_cfg = 'configs/faster_rcnn/faster-rcnn_r50_fpn_1x_coco.py'
+model_cfg = 'mmdet/.mim/configs/faster_rcnn/faster-rcnn_r50_fpn_1x_coco.py'
 device = 'cpu'
 backend_model = ['mmdeploy_models/mmdet/onnx/end2end.onnx']
-image = 'demo/demo.jpg'
+image = 'mmdet/.mim/demo/demo.jpg'
 
 # read deploy_cfg and model_cfg
 deploy_cfg, model_cfg = load_config(deploy_cfg, model_cfg)
@@ -146,7 +146,7 @@ You can also perform SDK model inference like following,
 from mmdeploy_python import Detector
 import cv2
 
-img = cv2.imread('demo/demo.jpg')
+img = cv2.imread('mmdet/.mim/demo/demo.jpg')
 
 # create a detector
 detector = Detector(model_path='mmdeploy_models/mmdet/onnx',

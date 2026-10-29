@@ -14,7 +14,7 @@ Instance segmentation has witnessed a remarkable progress on class-balanced benc
 
 - Please setup [LVIS dataset](../lvis/README.md) for MMDetection.
 
-- RFS indicates to use oversample strategy [here](../../docs/tutorials/customipredataset.md#class-balanced-dataset) with oversample threshold `1e-3`.
+- RFS indicates to use oversample strategy [here](../../../../docs/en/advanced_guides/customize_dataset.md#class-balanced-dataset) with oversample threshold `1e-3`.
 
 ## Results and models of Seasaw Loss on LVIS v1 dataset
 

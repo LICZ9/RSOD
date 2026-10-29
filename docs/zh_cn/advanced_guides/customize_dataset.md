@@ -324,8 +324,6 @@ MMEngine 也支持非常多的数据集包装器（wrapper）来混合数据集�
 - `ClassBalancedDataset`：以类别均衡的方式重复数据集。
 - `ConcatDataset`：合并数据集。
 
-具体使用方式见 [MMEngine 数据集包装器](#TODO)。
-
 ## 修改数据集的类别
 
 根据现有数据集的类型，我们可以修改它们的类别名称来训练其标注的子集。

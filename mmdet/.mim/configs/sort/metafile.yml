@@ -15,7 +15,7 @@ Collections:
 Models:
   - Name: sort_faster-rcnn_r50_fpn_8xb2-4e_mot17halftrain_test-mot17halfval
     In Collection: SORT
-    Config: configs/mot/sort/sort_faster-rcnn_r50_fpn_8xb2-4e_mot17halftrain_test-mot17halfval.py
+    Config: configs/sort/sort_faster-rcnn_r50_fpn_8xb2-4e_mot17halftrain_test-mot17halfval.py
     Metadata:
       Training Data: MOT17-half-train
       inference time (ms/im):

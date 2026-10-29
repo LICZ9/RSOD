@@ -38,7 +38,7 @@ CUDA_VISIBLE_DEVICES=-1 python tools/train.py ${CONFIG_FILE} [optional arguments
 An example of training the MOT model QDTrack on CPU:
 
 ```shell script
-CUDA_VISIBLE_DEVICES=-1 python tools/train.py configs/qdtrack/qdtrack_faster-rcnn_r50_fpn_8xb2-4e_mot17halftrain_test-mot17halfval.py
+CUDA_VISIBLE_DEVICES=-1 python tools/train.py mmdet/.mim/configs/qdtrack/qdtrack_faster-rcnn_r50_fpn_8xb2-4e_mot17halftrain_test-mot17halfval.py
 ```
 
 #### 2. Train on single GPU
@@ -54,7 +54,7 @@ You can use `export CUDA_VISIBLE_DEVICES=$GPU_ID` to select the GPU.
 An example of training the MOT model QDTrack on single GPU:
 
 ```shell script
-CUDA_VISIBLE_DEVICES=2 python tools/train.py configs/qdtrack/qdtrack_faster-rcnn_r50_fpn_8xb2-4e_mot17halftrain_test-mot17halfval.py
+CUDA_VISIBLE_DEVICES=2 python tools/train.py mmdet/.mim/configs/qdtrack/qdtrack_faster-rcnn_r50_fpn_8xb2-4e_mot17halftrain_test-mot17halfval.py
 ```
 
 #### 3. Train on single node multiple GPUs
@@ -80,7 +80,7 @@ CUDA_VISIBLE_DEVICES=4,5,6,7 PORT=29501 ./tools/dist_train.sh ${CONFIG_FILE} 4
 An example of training the MOT model QDTrack on single node multiple GPUs:
 
 ```shell script
-bash ./tools/dist_train.sh configs/qdtrack/qdtrack_faster-rcnn_r50_fpn_8xb2-4e_mot17halftrain_test-mot17halfval.py 8
+bash ./tools/dist_train.sh mmdet/.mim/configs/qdtrack/qdtrack_faster-rcnn_r50_fpn_8xb2-4e_mot17halftrain_test-mot17halfval.py 8
 ```
 
 #### 4. Train on multiple nodes
@@ -122,7 +122,7 @@ SRUN_ARGS="--quotatype=reserved" \
 bash ./tools/slurm_train.sh \
 mypartition \
 mottrack
-configs/qdtrack/qdtrack_faster-rcnn_r50_fpn_8xb2-4e_mot17halftrain_test-mot17halfval.py
+mmdet/.mim/configs/qdtrack/qdtrack_faster-rcnn_r50_fpn_8xb2-4e_mot17halftrain_test-mot17halfval.py
 ./work_dirs/QDTrack \
 8
 ```
@@ -168,7 +168,7 @@ CUDA_VISIBLE_DEVICES=-1 python tools/test_tracking.py ${CONFIG_FILE} [optional a
 An example of testing the MOT model SORT on CPU:
 
 ```shell script
-CUDA_VISIBLE_DEVICES=-1 python tools/test_tracking.py configs/sort/sort_faster-rcnn_r50_fpn_8xb2-4e_mot17halftrain_test-mot17halfval.py --detector ${CHECKPOINT_FILE}
+CUDA_VISIBLE_DEVICES=-1 python tools/test_tracking.py mmdet/.mim/configs/sort/sort_faster-rcnn_r50_fpn_8xb2-4e_mot17halftrain_test-mot17halfval.py --detector ${CHECKPOINT_FILE}
 ```
 
 #### 2. Test on single GPU
@@ -184,7 +184,7 @@ You can use `export CUDA_VISIBLE_DEVICES=$GPU_ID` to select the GPU.
 An example of testing the MOT model QDTrack on single GPU:
 
 ```shell script
-CUDA_VISIBLE_DEVICES=2 python tools/test_tracking.py configs/qdtrack/qdtrack_faster-rcnn_r50_fpn_8xb2-4e_mot17halftrain_test-mot17halfval.py --detector ${CHECKPOINT_FILE}
+CUDA_VISIBLE_DEVICES=2 python tools/test_tracking.py mmdet/.mim/configs/qdtrack/qdtrack_faster-rcnn_r50_fpn_8xb2-4e_mot17halftrain_test-mot17halfval.py --detector ${CHECKPOINT_FILE}
 ```
 
 #### 3. Test on single node multiple GPUs
@@ -199,7 +199,7 @@ bash ./tools/dist_test_tracking.sh ${CONFIG_FILE} ${GPU_NUM} [optional arguments
 An example of testing the MOT model DeepSort on single node multiple GPUs:
 
 ```shell script
-bash ./tools/dist_test_tracking.sh configs/qdtrack/qdtrack_faster-rcnn_r50_fpn_8xb2-4e_mot17halftrain_test-mot17halfval.py 8 --detector ${CHECKPOINT_FILE} --reid ${CHECKPOINT_FILE}
+bash ./tools/dist_test_tracking.sh mmdet/.mim/configs/qdtrack/qdtrack_faster-rcnn_r50_fpn_8xb2-4e_mot17halftrain_test-mot17halfval.py 8 --detector ${CHECKPOINT_FILE} --reid ${CHECKPOINT_FILE}
 ```
 
 #### 4. Test on multiple nodes
@@ -224,6 +224,6 @@ GPUS=8
 bash tools/slurm_test_tracking.sh \
 mypartition \
 vis \
-configs/mask2former_vis/mask2former_r50_8xb2-8e_youtubevis2021.py \
+mmdet/.mim/configs/mask2former_vis/mask2former_r50_8xb2-8e_youtubevis2021.py \
 --checkpoint ${CHECKPOINT_FILE}
 ```

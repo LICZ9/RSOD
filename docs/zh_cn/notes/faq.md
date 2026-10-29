@@ -10,13 +10,13 @@ MMDetection 目前绝大部分算法已经支持了 PyTorch 2.0 及其 `torch.co
 
 ```shell
 # 单卡
-python tools/train.py configs/rtmdet/rtmdet_s_8xb32-300e_coco.py  --cfg-options compile=True
+python tools/train.py mmdet/.mim/configs/rtmdet/rtmdet_s_8xb32-300e_coco.py  --cfg-options compile=True
 
 # 单机 8 卡
-./tools/dist_train.sh configs/rtmdet/rtmdet_s_8xb32-300e_coco.py 8 --cfg-options compile=True
+./tools/dist_train.sh mmdet/.mim/configs/rtmdet/rtmdet_s_8xb32-300e_coco.py 8 --cfg-options compile=True
 
 # 单机 8 卡 + AMP 混合精度训练
-./tools/dist_train.sh configs/rtmdet/rtmdet_s_8xb32-300e_coco.py 8 --cfg-options compile=True --amp
+./tools/dist_train.sh mmdet/.mim/configs/rtmdet/rtmdet_s_8xb32-300e_coco.py 8 --cfg-options compile=True --amp
 ```
 
 需要特别注意的是，PyTorch 2.0 对于动态 shape 支持不是非常完善，目标检测算法中大部分不仅输入 shape 是动态的，而且 loss 计算和后处理过程中也是动态的，这会导致在开启 `torch.compile` 功能后训练速度会变慢。基于此，如果你想启动 `torch.compile` 功能，则应该遵循如下原则：
@@ -29,11 +29,11 @@ python tools/train.py configs/rtmdet/rtmdet_s_8xb32-300e_coco.py  --cfg-options 
 ```shell
 # 单卡
 export DYNAMO_CACHE_SIZE_LIMIT = 4
-python tools/train.py configs/rtmdet/rtmdet_s_8xb32-300e_coco.py  --cfg-options compile=True
+python tools/train.py mmdet/.mim/configs/rtmdet/rtmdet_s_8xb32-300e_coco.py  --cfg-options compile=True
 
 # 单机 8 卡
 export DYNAMO_CACHE_SIZE_LIMIT = 4
-./tools/dist_train.sh configs/rtmdet/rtmdet_s_8xb32-300e_coco.py 8 --cfg-options compile=True
+./tools/dist_train.sh mmdet/.mim/configs/rtmdet/rtmdet_s_8xb32-300e_coco.py 8 --cfg-options compile=True
 ```
 
 关于 PyTorch 2.0 的 dynamo 常见问题，可以参考 [这里](https://pytorch.org/docs/stable/dynamo/faq.html)
@@ -123,7 +123,7 @@ PYTHONPATH="$(dirname $0)/..":$PYTHONPATH
 
 - "invalid device function" 或者 "no kernel image is available for execution".
 
-  1. 检查您正常安装了 CUDA runtime (一般在`/usr/local/`)，或者使用 `nvcc --version` 检查本地版本，有时安装 PyTorch 会顺带安装一个 CUDA runtime，并且实际优先使用 conda 环境中的版本，你可以使用 `conda list cudatoolkit` 查看其版本。
+  1. 检查 CUDA 安装目录中的 CUDA runtime，或者使用 `nvcc --version` 检查本地版本，有时安装 PyTorch 会顺带安装一个 CUDA runtime，并且实际优先使用 conda 环境中的版本，你可以使用 `conda list cudatoolkit` 查看其版本。
 
   2. 编译 extension 的 CUDA Toolkit 版本与运行时的 CUDA Toolkit 版本是否相符，
 
@@ -212,22 +212,6 @@ PYTHONPATH="$(dirname $0)/..":$PYTHONPATH
 - 训练中保存最好模型
 
   可以通过配置 `default_hooks = dict(checkpoint=dict(type='CheckpointHook', interval=1, save_best='auto')`开启。在 `auto` 参数情况下会根据返回的验证结果中的第一个 key 作为选择最优模型的依据，你也可以直接设置评估结果中的 key 来手动设置，例如 `save_best='coco/bbox_mAP'`。
-
-- 在 Resume 训练中使用 `ExpMomentumEMAHook`
-
-  如果在训练中使用了 `ExpMomentumEMAHook`，那么 resume 时候不能仅仅通过命令行参数 `--resume-from` 或 `--cfg-options resume_from` 实现恢复模型参数功能例如 `python tools/train.py configs/yolox/yolox_s_8x8_300e_coco.py --resume-from ./work_dir/yolox_s_8x8_300e_coco/epoch_x.pth`。以 `yolox_s` 算法为例，由于 `ExpMomentumEMAHook` 需要重新加载权重，你可以通过如下做法实现：
-
-  ```python
-  # 直接打开 configs/yolox/yolox_s_8x8_300e_coco.py 修改所有 resume_from 字段
-  resume_from=./work_dir/yolox_s_8x8_300e_coco/epoch_x.pth
-  custom_hooks=[...
-      dict(
-          type='ExpMomentumEMAHook',
-          resume_from=./work_dir/yolox_s_8x8_300e_coco/epoch_x.pth,
-          momentum=0.0001,
-          priority=49)
-      ]
-  ```
 
 ## Evaluation 相关
 

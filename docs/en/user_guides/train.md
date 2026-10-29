@@ -8,7 +8,7 @@ This section will show how to train _predefined_ models (under [configs](../../.
 Preparing datasets is also necessary for training. See section [Prepare datasets](#prepare-datasets) above for details.
 
 **Note**:
-Currently, the config files under `configs/cityscapes` use COCO pre-trained weights to initialize.
+Currently, the config files under `mmdet/.mim/configs/cityscapes` use COCO pre-trained weights to initialize.
 If your network connection is slow or unavailable, it's advisable to download existing models before beginning training to avoid errors.
 
 ## Learning rate auto scaling
@@ -138,7 +138,7 @@ The basic usage is as follows.
 Below is an example of using 16 GPUs to train Mask R-CNN on a Slurm partition named _dev_, and set the work-dir to some shared file systems.
 
 ```shell
-GPUS=16 ./tools/slurm_train.sh dev mask_r50_1x configs/mask-rcnn_r50_fpn_1x_coco.py /nfs/xxxx/mask_rcnn_r50_fpn_1x
+GPUS=16 ./tools/slurm_train.sh dev mask_r50_1x mmdet/.mim/configs/mask_rcnn/mask-rcnn_r50_fpn_1x_coco.py /nfs/xxxx/mask_rcnn_r50_fpn_1x
 ```
 
 You can check [the source code](../../../tools/slurm_train.sh) to review full arguments and environment variables.

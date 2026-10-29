@@ -51,11 +51,11 @@ The checkpoint provided below is the best one from two experiments.
 
 ### 1. Development Environment Setup
 
-Tracking Development Environment Setup can refer to this [document](../../docs/en/get_started.md).
+Tracking Development Environment Setup can refer to this [document](../../../../docs/en/get_started.md).
 
 ### 2. Dataset Prepare
 
-Tracking Dataset Prepare can refer to this [document](../../docs/en/user_guides/tracking_dataset_prepare.md).
+Tracking Dataset Prepare can refer to this [document](../../../../docs/en/user_guides/tracking_dataset_prepare.md).
 
 ### 3. Training
 
@@ -64,11 +64,11 @@ Due to the influence of parameters such as learning rate in default configuratio
 ```shell
 # Training MaskTrack R-CNN on YouTube-VIS-2021 dataset with following command.
 # The number after config file represents the number of GPUs used. Here we use 8 GPUs.
-bash tools/dist_train.sh configs/masktrack_rcnn/masktrack-rcnn_mask-rcnn_r50_fpn_8xb1-12e_youtubevis2021.py 8
+bash tools/dist_train.sh mmdet/.mim/configs/masktrack_rcnn/masktrack-rcnn_mask-rcnn_r50_fpn_8xb1-12e_youtubevis2021.py 8
 ```
 
 If you want to know about more detailed usage of `train.py/dist_train.sh/slurm_train.sh`,
-please refer to this [document](../../docs/en/user_guides/tracking_train_test.md).
+please refer to this [document](../../../../docs/en/user_guides/tracking_train_test.md).
 
 ### 4. Testing and evaluation
 
@@ -76,18 +76,18 @@ If you want to get the results of the [YouTube-VOS](https://youtube-vos.org/data
 
 ```shell
 # The number after config file represents the number of GPUs used.
-bash tools/dist_test_tracking.sh configs/masktrack_rcnn/masktrack-rcnn_mask-rcnn_r50_fpn_8xb1-12e_youtubevis2021.py 8 --checkpoint ${CHECKPOINT_PATH}
+bash tools/dist_test_tracking.sh mmdet/.mim/configs/masktrack_rcnn/masktrack-rcnn_mask-rcnn_r50_fpn_8xb1-12e_youtubevis2021.py 8 --checkpoint ${CHECKPOINT_PATH}
 ```
 
 If you want to know about more detailed usage of `train.py/dist_train.sh/slurm_train.sh`,
-please refer to this [document](../../docs/en/user_guides/tracking_train_test.md).
+please refer to this [document](../../../../docs/en/user_guides/tracking_train_test.md).
 
 ### 5.Inference
 
 Use a single GPU to predict a video and save it as a video.
 
 ```shell
-python demo/mot_demo.py demo/demo_mot.mp4 configs/masktrack_rcnn/masktrack-rcnn_mask-rcnn_r50_fpn_8xb1-12e_youtubevis2021.py  --checkpoint {CHECKPOINT_PATH} --out vis.mp4
+python mmdet/.mim/demo/mot_demo.py mmdet/.mim/demo/demo_mot.mp4 mmdet/.mim/configs/masktrack_rcnn/masktrack-rcnn_mask-rcnn_r50_fpn_8xb1-12e_youtubevis2021.py  --checkpoint {CHECKPOINT_PATH} --out vis.mp4
 ```
 
-If you want to know about more detailed usage of `mot_demo.py`, please refer to this [document](../../docs/en/user_guides/tracking_inference.md).
+If you want to know about more detailed usage of `mot_demo.py`, please refer to this [document](../../../../docs/en/user_guides/tracking_inference.md).

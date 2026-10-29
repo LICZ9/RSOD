@@ -71,7 +71,7 @@ Start the RTMDet backend inference service:
 cd path/to/mmetection
 
 label-studio-ml start projects/LabelStudio/backend_template --with \
-config_file=configs/rtmdet/rtmdet_m_8xb32-300e_coco.py \
+config_file=mmdet/.mim/configs/rtmdet/rtmdet_m_8xb32-300e_coco.py \
 checkpoint_file=./work_dirs/rtmdet_m_8xb32-300e_coco_20220719_112220-229f527c.pth \
 device=cpu \
 --port 8003

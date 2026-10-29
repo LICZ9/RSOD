@@ -179,7 +179,7 @@ train_pipeline = [
 </tr>
 </table>
 
-对于 test_pipeline，除了将 `Normalize` 和 `Pad` 这两个 transform 去掉之外，我们也将测试时的数据增强（TTA）与普通的测试流程分开，移除了 `MultiScaleFlipAug`。关于新版的 TTA 如何使用，详见[TTA 文档](../advanced_guides/tta.md)。
+对于 test_pipeline，除了将 `Normalize` 和 `Pad` 这两个 transform 去掉之外，我们也将测试时的数据增强（TTA）与普通的测试流程分开，移除了 `MultiScaleFlipAug`。关于新版的 TTA 如何使用，详见[TTA 文档](../user_guides/test.md)。
 
 下面同样以 Mask R-CNN 1x 的 test_pipeline 为例，介绍如何将 2.x 版本的配置迁移到 3.x 版本：
 

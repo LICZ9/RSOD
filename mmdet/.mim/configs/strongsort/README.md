@@ -41,11 +41,11 @@ Existing Multi-Object Tracking (MOT) methods can be roughly classified as tracki
 
 ### 1. Development Environment Setup
 
-Tracking Development Environment Setup can refer to this [document](../../docs/en/get_started.md).
+Tracking Development Environment Setup can refer to this [document](../../../../docs/en/get_started.md).
 
 ### 2. Dataset Prepare
 
-Tracking Dataset Prepare can refer to this [document](../../docs/en/user_guides/tracking_dataset_prepare.md).
+Tracking Dataset Prepare can refer to this [document](../../../../docs/en/user_guides/tracking_dataset_prepare.md).
 
 ### 3. Training
 
@@ -58,7 +58,7 @@ You can train the detector as follows.
 ```shell script
 # Training YOLOX-X on crowdhuman and mot17-half-train dataset with following command.
 # The number after config file represents the number of GPUs used. Here we use 8 GPUs.
-bash tools/dist_train.sh configs/det/yolox_x_8xb4-80e_crowdhuman-mot17halftrain_test-mot17halfval.py 8
+bash tools/dist_train.sh mmdet/.mim/configs/strongsort/yolox_x_8xb4-80e_crowdhuman-mot17halftrain_test-mot17halfval.py 8
 ```
 
 And you can train the ReID model as follows.
@@ -66,11 +66,11 @@ And you can train the ReID model as follows.
 ```shell script
 # Training ReID model on mot17-train80 dataset with following command.
 # The number after config file represents the number of GPUs used. Here we use 8 GPUs.
-bash tools/dist_train.sh configs/reid/reid_r50_8xb32-6e_mot17train80_test-mot17val20.py 8
+bash tools/dist_train.sh mmdet/.mim/configs/reid/reid_r50_8xb32-6e_mot17train80_test-mot17val20.py 8
 ```
 
 If you want to know about more detailed usage of `train.py/dist_train.sh/slurm_train.sh`,
-please refer to this [document](../../docs/en/user_guides/tracking_train_test.md).
+please refer to this [document](../../../../docs/en/user_guides/tracking_train_test.md).
 
 ### 4. Testing and evaluation
 
@@ -79,7 +79,7 @@ please refer to this [document](../../docs/en/user_guides/tracking_train_test.md
 ```shell script
 # Example 1: Test on motXX-half-val set.
 # The number after config file represents the number of GPUs used. Here we use 8 GPUs.
-bash tools/dist_test_tracking.sh configs/strongsort/strongsort_yolox_x_8xb4-80e_crowdhuman-mot17halftrain_test-mot17halfval.py 8 --detector ${CHECKPOINT_PATH} --reid ${CHECKPOINT_PATH}
+bash tools/dist_test_tracking.sh mmdet/.mim/configs/strongsort/strongsort_yolox_x_8xb4-80e_crowdhuman-mot17halftrain_test-mot17halfval.py 8 --detector ${CHECKPOINT_PATH} --reid ${CHECKPOINT_PATH}
 ```
 
 **2.2 Example on MOTxx-test dataset**
@@ -91,18 +91,18 @@ It will be stored in `./mot_20_test_res`, you can modify the saved path in `test
 ```shell script
 # Example 2: Test on motxx-test set
 # The number after config file represents the number of GPUs used
-bash tools/dist_test_tracking.sh configs/strongsort/strongsort_yolox_x_8xb4-80e_crowdhuman-mot20train_test-mot20test.py 8 --detector ${CHECKPOINT_PATH} --reid ${CHECKPOINT_PATH}
+bash tools/dist_test_tracking.sh mmdet/.mim/configs/strongsort/strongsort_yolox_x_8xb4-80e_crowdhuman-mot20train_test-mot20test.py 8 --detector ${CHECKPOINT_PATH} --reid ${CHECKPOINT_PATH}
 ```
 
 If you want to know about more detailed usage of `test_tracking.py/dist_test_tracking.sh/slurm_test_tracking.sh`,
-please refer to this [document](../../docs/en/user_guides/tracking_train_test.md).
+please refer to this [document](../../../../docs/en/user_guides/tracking_train_test.md).
 
 ### 3.Inference
 
 Use a single GPU to predict a video and save it as a video.
 
 ```shell
-python demo/mot_demo.py demo/demo_mot.mp4 configs/strongsort/strongsort_yolox_x_8xb4-80e_crowdhuman-mot17halftrain_test-mot17halfval.py --detector ${CHECKPOINT_FILE} --reid ${CHECKPOINT_PATH} --out mot.mp4
+python mmdet/.mim/demo/mot_demo.py mmdet/.mim/demo/demo_mot.mp4 mmdet/.mim/configs/strongsort/strongsort_yolox_x_8xb4-80e_crowdhuman-mot17halftrain_test-mot17halfval.py --detector ${CHECKPOINT_FILE} --reid ${CHECKPOINT_PATH} --out mot.mp4
 ```
 
-If you want to know about more detailed usage of `mot_demo.py`, please refer to this [document](../../docs/en/user_guides/tracking_inference.md).
+If you want to know about more detailed usage of `mot_demo.py`, please refer to this [document](../../../../docs/en/user_guides/tracking_inference.md).

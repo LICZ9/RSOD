@@ -50,7 +50,7 @@ bash tools/dist_test.sh \
 
    ```shell
    python tools/test.py \
-       configs/rtmdet/rtmdet_l_8xb32-300e_coco.py \
+       mmdet/.mim/configs/rtmdet/rtmdet_l_8xb32-300e_coco.py \
        checkpoints/rtmdet_l_8xb32-300e_coco_20220719_112030-5a0be7c4.pth \
        --show
    ```
@@ -59,56 +59,56 @@ bash tools/dist_test.sh \
 
    ```shell
    python tools/test.py \
-       configs/rtmdet/rtmdet_l_8xb32-300e_coco.py \
+       mmdet/.mim/configs/rtmdet/rtmdet_l_8xb32-300e_coco.py \
        checkpoints/rtmdet_l_8xb32-300e_coco_20220719_112030-5a0be7c4.pth \
        --show-dir rtmdet_l_8xb32-300e_coco_results
    ```
 
-3. 在 Pascal VOC 数据集上测试 Faster R-CNN，不保存测试结果，测试 `mAP`。配置文件和 checkpoint 文件 [在此](../../../configs/pascal_voc) 。
+3. 在 Pascal VOC 数据集上测试 Faster R-CNN，不保存测试结果，测试 `mAP`。配置文件和 checkpoint 文件 [在此](../../../mmdet/.mim/configs/pascal_voc) 。
 
    ```shell
    python tools/test.py \
-       configs/pascal_voc/faster-rcnn_r50_fpn_1x_voc0712.py \
+       mmdet/.mim/configs/pascal_voc/faster-rcnn_r50_fpn_1x_voc0712.py \
        checkpoints/faster_rcnn_r50_fpn_1x_voc0712_20200624-c9895d40.pth
    ```
 
-4. 使用 8 块 GPU 测试 Mask R-CNN，测试 `bbox` 和 `mAP` 。配置文件和 checkpoint 文件 [在此](../../../configs/mask_rcnn) 。
+4. 使用 8 块 GPU 测试 Mask R-CNN，测试 `bbox` 和 `mAP` 。配置文件和 checkpoint 文件 [在此](../../../mmdet/.mim/configs/mask_rcnn) 。
 
    ```shell
    ./tools/dist_test.sh \
-       configs/mask-rcnn_r50_fpn_1x_coco.py \
+       mmdet/.mim/configs/mask_rcnn/mask-rcnn_r50_fpn_1x_coco.py \
        checkpoints/mask_rcnn_r50_fpn_1x_coco_20200205-d4b0c5d6.pth \
        8 \
        --out results.pkl
    ```
 
-5. 使用 8 块 GPU 测试 Mask R-CNN，测试**每类**的 `bbox` 和 `mAP`。配置文件和 checkpoint 文件 [在此](../../../configs/mask_rcnn) 。
+5. 使用 8 块 GPU 测试 Mask R-CNN，测试**每类**的 `bbox` 和 `mAP`。配置文件和 checkpoint 文件 [在此](../../../mmdet/.mim/configs/mask_rcnn) 。
 
    ```shell
    ./tools/dist_test.sh \
-       configs/mask_rcnn/mask-rcnn_r50_fpn_1x_coco.py \
+       mmdet/.mim/configs/mask_rcnn/mask-rcnn_r50_fpn_1x_coco.py \
        checkpoints/mask_rcnn_r50_fpn_1x_coco_20200205-d4b0c5d6.pth \
        8
    ```
 
    该命令生成两个JSON文件 `./work_dirs/coco_instance/test.bbox.json` 和 `./work_dirs/coco_instance/test.segm.json`。
 
-6. 在 COCO test-dev 数据集上，使用 8 块 GPU 测试 Mask R-CNN，并生成 JSON 文件提交到官方评测服务器，配置文件和 checkpoint 文件 [在此](../../../configs/mask_rcnnn) 。你可以在 [config](./././configs/_base_/datasets/coco_instance.py) 的注释中用 test_evaluator 和 test_dataloader 替换原来的 test_evaluator 和 test_dataloader，然后运行：
+6. 在 COCO test-dev 数据集上，使用 8 块 GPU 测试 Mask R-CNN，并生成 JSON 文件提交到官方评测服务器，配置文件和 checkpoint 文件 [在此](../../../mmdet/.mim/configs/mask_rcnn) 。你可以在 [config](../../../mmdet/.mim/configs/_base_/datasets/coco_instance.py) 的注释中用 test_evaluator 和 test_dataloader 替换原来的 test_evaluator 和 test_dataloader，然后运行：
 
    ```shell
    ./tools/dist_test.sh \
-       configs/cityscapes/mask-rcnn_r50_fpn_1x_cityscapes.py \
+       mmdet/.mim/configs/cityscapes/mask-rcnn_r50_fpn_1x_cityscapes.py \
        checkpoints/mask_rcnn_r50_fpn_1x_cityscapes_20200227-afe51d5a.pth \
        8
    ```
 
    这行命令生成两个 JSON 文件 `mask_rcnn_test-dev_results.bbox.json` 和 `mask_rcnn_test-dev_results.segm.json`。
 
-7. 在 Cityscapes 数据集上，使用 8 块 GPU 测试 Mask R-CNN，生成 txt 和 png 文件，并上传到官方评测服务器。配置文件和 checkpoint 文件 [在此](../../../configs/cityscapes) 。 你可以在 [config](./././configs/_base_/datasets/cityscapes_instance.py) 的注释中用 test_evaluator 和 test_dataloader 替换原来的 test_evaluator 和 test_dataloader，然后运行：
+7. 在 Cityscapes 数据集上，使用 8 块 GPU 测试 Mask R-CNN，生成 txt 和 png 文件，并上传到官方评测服务器。配置文件和 checkpoint 文件 [在此](../../../mmdet/.mim/configs/cityscapes) 。 你可以在 [config](../../../mmdet/.mim/configs/_base_/datasets/cityscapes_instance.py) 的注释中用 test_evaluator 和 test_dataloader 替换原来的 test_evaluator 和 test_dataloader，然后运行：
 
    ```shell
    ./tools/dist_test.sh \
-       configs/cityscapes/mask-rcnn_r50_fpn_1x_cityscapes.py \
+       mmdet/.mim/configs/cityscapes/mask-rcnn_r50_fpn_1x_cityscapes.py \
        checkpoints/mask_rcnn_r50_fpn_1x_cityscapes_20200227-afe51d5a.pth \
        8
    ```
@@ -164,7 +164,7 @@ bash tools/dist_test.sh \
 
 ```sh
 ./tools/dist_test.sh \
-    configs/mask_rcnn/mask-rcnn_r50_fpn_1x_coco.py \
+    mmdet/.mim/configs/mask_rcnn/mask-rcnn_r50_fpn_1x_coco.py \
     checkpoints/mask_rcnn_r50_fpn_1x_coco_20200205-d4b0c5d6.pth \
     8
 ```
@@ -277,9 +277,9 @@ tta_pipeline = [
 以上数据增强管道将首先对图像执行 3 个多尺度转换，然后执行 2 个翻转转换（翻转和不翻转），最后使用 PackDetInputs 将图像打包到最终结果中。
 这里有更多的 TTA 使用案例供您参考：
 
-- [RetinaNet](../../../configs/retinanet/retinanet_tta.py)
-- [CenterNet](../../../configs/centernet/centernet_tta.py)
-- [YOLOX](../../../configs/rtmdet/rtmdet_tta.py)
-- [RTMDet](../../../configs/yolox/yolox_tta.py)
+- [RetinaNet](../../../mmdet/.mim/configs/retinanet/retinanet_tta.py)
+- [CenterNet](../../../mmdet/.mim/configs/centernet/centernet_tta.py)
+- [YOLOX](../../../mmdet/.mim/configs/rtmdet/rtmdet_tta.py)
+- [RTMDet](../../../mmdet/.mim/configs/yolox/yolox_tta.py)
 
 更多高级用法和 TTA 的数据流，请参考 [MMEngine](https://mmengine.readthedocs.io/en/latest/advanced_tutorials/test_time_augmentation.html#data-flow)。我们将在后续支持实例分割 TTA。

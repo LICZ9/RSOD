@@ -1,6 +1,7 @@
 # Copyright (c) OpenMMLab. All rights reserved.
 import copy
 import os.path as osp
+import re
 import warnings
 from typing import Dict, Iterable, List, Optional, Sequence, Tuple, Union
 
@@ -13,8 +14,9 @@ from mmengine.dataset import Compose
 from mmengine.fileio import (get_file_backend, isdir, join_path,
                              list_dir_or_file)
 from mmengine.infer.infer import BaseInferencer, ModelType
+from mmengine.logging import print_log
 from mmengine.model.utils import revert_sync_batchnorm
-from mmengine.registry import init_default_scope
+from mmengine.registry import DefaultScope, init_default_scope
 from mmengine.runner.checkpoint import _load_checkpoint_to_model
 from mmengine.visualization import Visualizer
 from rich.progress import track
@@ -49,7 +51,7 @@ class DetInferencer(BaseInferencer):
         model (str, optional): Path to the config file or the model name
             defined in metafile. For example, it could be
             "rtmdet-s" or 'rtmdet_s_8xb32-300e_coco' or
-            "configs/rtmdet/rtmdet_s_8xb32-300e_coco.py".
+            "mmdet/.mim/configs/rtmdet/rtmdet_s_8xb32-300e_coco.py".
             If model is not specified, user must provide the
             `weights` saved by MMEngine which contains the config string.
             Defaults to None.
@@ -100,6 +102,59 @@ class DetInferencer(BaseInferencer):
             model=model, weights=weights, device=device, scope=scope)
         self.model = revert_sync_batchnorm(self.model)
         self.show_progress = show_progress
+
+    @staticmethod
+    def _get_model_index_dir() -> str:
+        """Locate a complete source or packaged model index."""
+        package_dir = osp.dirname(osp.dirname(__file__))
+        candidates = (osp.dirname(package_dir), osp.join(package_dir, '.mim'))
+        for directory in candidates:
+            if (osp.isfile(osp.join(directory, 'model-index.yml'))
+                    and osp.isdir(osp.join(directory, 'configs'))):
+                return directory
+        raise FileNotFoundError(
+            'Cannot find model-index.yml and configs for mmdet')
+
+    @staticmethod
+    def _model_names(model_cfg: dict) -> List[str]:
+        aliases = model_cfg.get('Alias', [])
+        if isinstance(aliases, str):
+            aliases = [aliases]
+        return [model_cfg['Name'], *aliases]
+
+    def _load_model_from_metafile(self, model: str) -> Tuple[ConfigType, str]:
+        if self.scope != 'mmdet':
+            return super()._load_model_from_metafile(model)
+        directory = self._get_model_index_dir()
+        for model_cfg in self._get_models_from_metafile(directory):
+            if model.lower() in (
+                    name.lower() for name in self._model_names(model_cfg)):
+                cfg = mmengine.Config.fromfile(
+                    osp.join(directory, model_cfg['Config']))
+                weights = model_cfg['Weights']
+                return cfg, weights[0] if isinstance(weights, list) else weights
+        raise ValueError(f'Cannot find model: {model} in {self.scope}')
+
+    @staticmethod
+    def list_models(scope: Optional[str] = None, patterns: str = r'.*'):
+        """List model names and aliases matching a regular expression."""
+        if scope is None:
+            default_scope = DefaultScope.get_current_instance()
+            scope = (default_scope.scope_name if default_scope is not None
+                     else 'mmdet')
+        if scope != 'mmdet':
+            return BaseInferencer.list_models(scope, patterns)
+        directory = DetInferencer._get_model_index_dir()
+        matched_models = [
+            name
+            for model_cfg in DetInferencer._get_models_from_metafile(directory)
+            for name in DetInferencer._model_names(model_cfg)
+            if re.match(patterns, name) is not None
+        ]
+        print_log(
+            ''.join(f'model_name: {name}\n' for name in matched_models),
+            logger='current')
+        return matched_models
 
     def _load_weights_to_model(self, model: nn.Module,
                                checkpoint: Optional[dict],

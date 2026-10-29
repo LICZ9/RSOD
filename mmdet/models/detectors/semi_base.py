@@ -13,7 +13,6 @@ from mmdet.structures import SampleList
 from mmdet.structures.bbox import bbox_project
 from mmdet.utils import ConfigType, OptConfigType, OptMultiConfig
 from .base import BaseDetector
-import copy
 
 
 @MODELS.register_module()

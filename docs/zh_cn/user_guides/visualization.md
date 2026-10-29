@@ -67,7 +67,7 @@ visualization=dict( #用户可视化验证和测试结果
 | interval | 控制在DetVisualizationHook启用时存储或显示验证或测试结果的间隔，单位为迭代次数。 |
 |   show   |                         控制是否可视化验证或测试的结果。                         |
 
-如果您想在训练或测试期间启用 `DetVisualizationHook` 相关功能和配置，您只需要修改配置文件，以 `configs/rtmdet/rtmdet_tiny_8xb32-300e_coco.py` 为例，同时绘制注释和预测，并显示图像，配置文件可以修改如下：
+如果您想在训练或测试期间启用 `DetVisualizationHook` 相关功能和配置，您只需要修改配置文件，以 `mmdet/.mim/configs/rtmdet/rtmdet_tiny_8xb32-300e_coco.py` 为例，同时绘制注释和预测，并显示图像，配置文件可以修改如下：
 
 ```Python
 visualization = _base_.default_hooks.visualization
@@ -82,10 +82,10 @@ visualization.update(dict(draw=True, show=True))
 
 ```Shell
 # 展示测试结果
-python tools/test.py configs/rtmdet/rtmdet_tiny_8xb32-300e_coco.py https://download.openmmlab.com/mmdetection/v3.0/rtmdet/rtmdet_tiny_8xb32-300e_coco/rtmdet_tiny_8xb32-300e_coco_20220902_112414-78e30dcc.pth --show
+python tools/test.py mmdet/.mim/configs/rtmdet/rtmdet_tiny_8xb32-300e_coco.py https://download.openmmlab.com/mmdetection/v3.0/rtmdet/rtmdet_tiny_8xb32-300e_coco/rtmdet_tiny_8xb32-300e_coco_20220902_112414-78e30dcc.pth --show
 
 # 指定存储预测结果的位置
-python tools/test.py configs/rtmdet/rtmdet_tiny_8xb32-300e_coco.py https://download.openmmlab.com/mmdetection/v3.0/rtmdet/rtmdet_tiny_8xb32-300e_coco/rtmdet_tiny_8xb32-300e_coco_20220902_112414-78e30dcc.pth --show-dir imgs/
+python tools/test.py mmdet/.mim/configs/rtmdet/rtmdet_tiny_8xb32-300e_coco.py https://download.openmmlab.com/mmdetection/v3.0/rtmdet/rtmdet_tiny_8xb32-300e_coco/rtmdet_tiny_8xb32-300e_coco_20220902_112414-78e30dcc.pth --show-dir imgs/
 ```
 
 <div align=center>

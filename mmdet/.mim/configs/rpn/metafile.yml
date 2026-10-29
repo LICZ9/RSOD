@@ -48,7 +48,7 @@ Models:
 
   - Name: rpn_r50_fpn_2x_coco
     In Collection: RPN
-    Config: rpn_r50_fpn_2x_coco.py
+    Config: configs/rpn/rpn_r50_fpn_2x_coco.py
     Metadata:
       Epochs: 24
     Results:

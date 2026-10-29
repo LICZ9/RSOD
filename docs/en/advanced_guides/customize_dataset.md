@@ -173,7 +173,7 @@ Here is a valid example of annotations:
  ]
 ```
 
-We use this way to support CityScapes dataset. The script is in [cityscapes.py](../../../tools/dataset_converters/cityscapes.py) and we also provide the finetuning [configs](../../../configs/cityscapes).
+We use this way to support CityScapes dataset. The script is in [cityscapes.py](../../../tools/dataset_converters/cityscapes.py) and we also provide the finetuning [configs](../../../mmdet/.mim/configs/cityscapes).
 
 **Note**
 
@@ -327,8 +327,6 @@ Currently it supports to three dataset wrappers as below:
 - `RepeatDataset`: simply repeat the whole dataset.
 - `ClassBalancedDataset`: repeat dataset in a class balanced manner.
 - `ConcatDataset`: concat datasets.
-
-For detailed usage, see [MMEngine Dataset Wrapper](#TODO).
 
 ## Modify Dataset Classes
 

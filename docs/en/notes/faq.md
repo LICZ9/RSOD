@@ -10,13 +10,13 @@ To enable the `torch.compile` function, simply add `--cfg-options compile=True` 
 
 ```shell
 # Single GPU
-python tools/train.py configs/rtmdet/rtmdet_s_8xb32-300e_coco.py  --cfg-options compile=True
+python tools/train.py mmdet/.mim/configs/rtmdet/rtmdet_s_8xb32-300e_coco.py  --cfg-options compile=True
 
 # Single node multiple GPUs
-./tools/dist_train.sh configs/rtmdet/rtmdet_s_8xb32-300e_coco.py 8 --cfg-options compile=True
+./tools/dist_train.sh mmdet/.mim/configs/rtmdet/rtmdet_s_8xb32-300e_coco.py 8 --cfg-options compile=True
 
 # Single node multiple GPUs + AMP
-./tools/dist_train.sh configs/rtmdet/rtmdet_s_8xb32-300e_coco.py 8 --cfg-options compile=True --amp
+./tools/dist_train.sh mmdet/.mim/configs/rtmdet/rtmdet_s_8xb32-300e_coco.py 8 --cfg-options compile=True --amp
 ```
 
 It is important to note that PyTorch 2.0's support for dynamic shapes is not yet fully developed. In most object detection algorithms, not only are the input shapes dynamic, but the loss calculation and post-processing parts are also dynamic. This can lead to slower training speeds when using the `torch.compile` function. Therefore, if you wish to enable the `torch.compile` function, you should follow these principles:
@@ -29,11 +29,11 @@ In MMDetection, you can set the `torch._dynamo.config.cache_size_limit` paramete
 ```shell
 # Single GPU
 export DYNAMO_CACHE_SIZE_LIMIT = 4
-python tools/train.py configs/rtmdet/rtmdet_s_8xb32-300e_coco.py  --cfg-options compile=True
+python tools/train.py mmdet/.mim/configs/rtmdet/rtmdet_s_8xb32-300e_coco.py  --cfg-options compile=True
 
 # Single node multiple GPUs
 export DYNAMO_CACHE_SIZE_LIMIT = 4
-./tools/dist_train.sh configs/rtmdet/rtmdet_s_8xb32-300e_coco.py 8 --cfg-options compile=True
+./tools/dist_train.sh mmdet/.mim/configs/rtmdet/rtmdet_s_8xb32-300e_coco.py 8 --cfg-options compile=True
 ```
 
 About the common questions about PyTorch 2.0's dynamo, you can refer to [here](https://pytorch.org/docs/stable/dynamo/faq.html)
@@ -120,7 +120,7 @@ Compatible MMDetection, MMEngine, and MMCV versions are shown as below. Please c
 
 - "invalid device function" or "no kernel image is available for execution".
 
-  1. Check if your cuda runtime version (under `/usr/local/`), `nvcc --version` and `conda list cudatoolkit` version match.
+  1. Check if your CUDA runtime version in the CUDA installation directory, `nvcc --version` and `conda list cudatoolkit` version match.
   2. Run `python mmdet/utils/collect_env.py` to check whether PyTorch, torchvision, and MMCV are built for the correct GPU architecture.
      You may need to set `TORCH_CUDA_ARCH_LIST` to reinstall MMCV.
      The GPU arch table could be found [here](https://docs.nvidia.com/cuda/cuda-compiler-driver-nvcc/index.html#gpu-feature-list),

@@ -2,7 +2,7 @@
 
 候选区域网络 (Region Proposal Network, RPN) 作为 [Faster R-CNN](https://arxiv.org/abs/1506.01497) 的一个子模块，将为 Faster R-CNN 的第二阶段产生候选区域。在 MMDetection 里大多数的二阶段检测器使用 [`RPNHead`](../../../mmdet/models/dense_heads/rpn_head.py)作为候选区域网络来产生候选区域。然而，任何的单阶段检测器都可以作为候选区域网络，是因为他们对边界框的预测可以被视为是一种候选区域，并且因此能够在 R-CNN 中得到改进。因此在 MMDetection v3.0 中会支持将单阶段检测器作为 RPN 使用。
 
-接下来我们通过一个例子，即如何在 [Faster R-CNN](../../../configs/faster_rcnn/faster-rcnn_r50_fpn_fcos-rpn_1x_coco.py) 中使用一个无锚框的单阶段的检测器模型 [FCOS](../../../configs/fcos/fcos_r50-caffe_fpn_gn-head_1x_coco.py) 作为 RPN ，详细阐述具体的全部流程。
+接下来我们通过一个例子，即如何在 [Faster R-CNN](../../../mmdet/.mim/configs/faster_rcnn/faster-rcnn_r50_fpn_fcos-rpn_1x_coco.py) 中使用一个无锚框的单阶段的检测器模型 [FCOS](../../../mmdet/.mim/configs/fcos/fcos_r50-caffe_fpn_gn-head_1x_coco.py) 作为 RPN ，详细阐述具体的全部流程。
 
 主要流程如下:
 
@@ -10,9 +10,11 @@
 2. 评估候选区域
 3. 用预先训练的 FCOS 训练定制的 Faster R-CNN
 
+以下命令在项目根目录的 Bash 终端中运行，示例使用 8 张 GPU。请根据实际可用的 GPU 数量调整命令中的 `8`。输出目录均相对于项目根目录。
+
 ## 在 Faster R-CNN 中使用 `FCOSHead` 作为` RPNHead`
 
-为了在 Faster R-CNN 中使用 `FCOSHead` 作为 `RPNHead` ，我们应该创建一个名为 `configs/faster_rcnn/faster-rcnn_r50_fpn_fcos-rpn_1x_coco.py` 的配置文件，并且在 `configs/faster_rcnn/faster-rcnn_r50_fpn_fcos-rpn_1x_coco.py` 中将 `rpn_head` 的设置替换为 `bbox_head` 的设置，此外我们仍然使用 FCOS 的瓶颈设置，步幅为`[8,16,32,64,128]`，并且更新 `bbox_roi_extractor` 的 `featmap_stride` 为 ` [8,16,32,64,128]`。为了避免损失变慢，我们在前1000次迭代而不是前500次迭代中应用预热，这意味着 lr 增长得更慢。相关配置如下:
+项目已提供 `mmdet/.mim/configs/faster_rcnn/faster-rcnn_r50_fpn_fcos-rpn_1x_coco.py`，可以直接用于本节的训练命令。该配置将 FCOS 的 `bbox_head` 设置用作 Faster R-CNN 的 `rpn_head`，保留 FCOS 的颈部设置，步幅为 `[8,16,32,64,128]`，并将 `bbox_roi_extractor` 的 `featmap_strides` 更新为 `[8,16,32,64,128]`。为了避免损失出现 NaN，预热阶段由 500 次迭代延长至 1000 次迭代，让学习率增长得更慢。相关配置如下：
 
 ```python
 _base_ = [
@@ -21,7 +23,7 @@ _base_ = [
     '../_base_/schedules/schedule_1x.py', '../_base_/default_runtime.py'
 ]
 model = dict(
-    # 从 configs/fcos/fcos_r50-caffe_fpn_gn-head_1x_coco.py 复制
+    # 从 mmdet/.mim/configs/fcos/fcos_r50-caffe_fpn_gn-head_1x_coco.py 复制
     neck=dict(
         start_level=1,
         add_extra_convs='on_output',  # 使用 P5
@@ -62,27 +64,26 @@ param_scheduler = [
 
 然后，我们可以使用下面的命令来训练我们的定制模型。更多训练命令，请参考[这里](train.md)。
 
-```python
-# 使用8个 GPU 进行训练
-bash
-tools/dist_train.sh
-configs/faster_rcnn/faster-rcnn_r50_fpn_fcos-rpn_1x_coco.py
---work-dir  /work_dirs/faster-rcnn_r50_fpn_fcos-rpn_1x_coco
+```bash
+bash tools/dist_train.sh \
+    mmdet/.mim/configs/faster_rcnn/faster-rcnn_r50_fpn_fcos-rpn_1x_coco.py \
+    8 \
+    --work-dir ./work_dirs/faster-rcnn_r50_fpn_fcos-rpn_1x_coco
 ```
 
 ## 评估候选区域
 
-候选区域的质量对检测器的性能有重要影响，因此，我们也提供了一种评估候选区域的方法。和上面一样创建一个新的名为 `configs/rpn/fcos-rpn_r50_fpn_1x_coco.py` 的配置文件，并且在 `configs/rpn/fcos-rpn_r50_fpn_1x_coco.py` 中将 `rpn_head` 的设置替换为 `bbox_head` 的设置。
+候选区域的质量对检测器的性能有重要影响。先创建 `configs/rpn/` 目录，将下面的配置保存为 `configs/rpn/fcos-rpn_r50_fpn_1x_coco.py`。其中 `rpn_head` 使用 FCOS 的 `bbox_head` 设置，基础配置引用本项目的 `mmdet/.mim/configs/_base_/` 目录。
 
 ```python
 _base_ = [
-    '../_base_/models/rpn_r50_fpn.py', '../_base_/datasets/coco_detection.py',
-    '../_base_/schedules/schedule_1x.py', '../_base_/default_runtime.py'
+    '../../mmdet/.mim/configs/_base_/models/rpn_r50_fpn.py', '../../mmdet/.mim/configs/_base_/datasets/coco_detection.py',
+    '../../mmdet/.mim/configs/_base_/schedules/schedule_1x.py', '../../mmdet/.mim/configs/_base_/default_runtime.py'
 ]
 val_evaluator = dict(metric='proposal_fast')
 test_evaluator = val_evaluator
 model = dict(
-    # 从 configs/fcos/fcos_r50-caffe_fpn_gn-head_1x_coco.py 复制
+    # 从 mmdet/.mim/configs/fcos/fcos_r50-caffe_fpn_gn-head_1x_coco.py 复制
     neck=dict(
         start_level=1,
         add_extra_convs='on_output',  # 使用 P5
@@ -108,23 +109,22 @@ model = dict(
 
 假设我们在训练之后有检查点 `./work_dirs/faster-rcnn_r50_fpn_fcos-rpn_1x_coco/epoch_12.pth` ，然后，我们可以使用下面的命令来评估建议的质量。
 
-```python
-# 使用8个 GPU 进行测试
-bash
-tools/dist_test.sh
-configs/rpn/fcos-rpn_r50_fpn_1x_coco.py
---work_dirs /faster-rcnn_r50_fpn_fcos-rpn_1x_coco/epoch_12.pth
+```bash
+bash tools/dist_test.sh \
+    configs/rpn/fcos-rpn_r50_fpn_1x_coco.py \
+    ./work_dirs/faster-rcnn_r50_fpn_fcos-rpn_1x_coco/epoch_12.pth \
+    8
 ```
 
 ## 用预先训练的 FCOS 训练定制的 Faster R-CNN
 
-预训练不仅加快了训练的收敛速度，而且提高了检测器的性能。因此，我们在这里给出一个例子来说明如何使用预先训练的 FCOS 作为 RPN 来加速训练和提高精度。假设我们想在 Faster R-CNN 中使用 `FCOSHead` 作为 `rpn_head`，并加载预先训练权重来进行训练 [`fcos_r50-caffe_fpn_gn-head_1x_coco`](https://download.openmmlab.com/mmdetection/v2.0/fcos/fcos_r50_caffe_fpn_gn-head_1x_coco/fcos_r50_caffe_fpn_gn-head_1x_coco-821213aa.pth)。 配置文件 `configs/faster_rcnn/faster-rcnn_r50-caffe_fpn_fcos- rpn_1x_copy .py` 的内容如下所示。注意，`fcos_r50-caffe_fpn_gn-head_1x_coco` 使用 ResNet50 的 caffe 版本，因此需要更新 `data_preprocessor` 中的像素平均值和 std。
+这里以 Faster R-CNN 使用 `FCOSHead` 作为 `rpn_head` 为例，加载预训练 FCOS 权重。先创建 `configs/faster_rcnn/` 目录，将下面的配置保存为 `configs/faster_rcnn/faster-rcnn_r50-caffe_fpn_fcos-rpn_1x_coco.py`。该预训练模型使用 ResNet50 的 caffe 版本，因此需要同步设置 `data_preprocessor` 中的像素均值和标准差。
 
 ```python
 _base_ = [
-    '../_base_/models/faster-rcnn_r50_fpn.py',
-    '../_base_/datasets/coco_detection.py',
-    '../_base_/schedules/schedule_1x.py', '../_base_/default_runtime.py'
+    '../../mmdet/.mim/configs/_base_/models/faster-rcnn_r50_fpn.py',
+    '../../mmdet/.mim/configs/_base_/datasets/coco_detection.py',
+    '../../mmdet/.mim/configs/_base_/schedules/schedule_1x.py', '../../mmdet/.mim/configs/_base_/default_runtime.py'
 ]
 model = dict(
     data_preprocessor=dict(
@@ -163,9 +163,9 @@ load_from = 'https://download.openmmlab.com/mmdetection/v2.0/fcos/fcos_r50_caffe
 
 训练命令如下。
 
-```python
-bash
-tools/dist_train.sh
-configs/faster_rcnn/faster-rcnn_r50-caffe_fpn_fcos-rpn_1x_coco.py  \
---work-dir /work_dirs/faster-rcnn_r50-caffe_fpn_fcos-rpn_1x_coco
+```bash
+bash tools/dist_train.sh \
+    configs/faster_rcnn/faster-rcnn_r50-caffe_fpn_fcos-rpn_1x_coco.py \
+    8 \
+    --work-dir ./work_dirs/faster-rcnn_r50-caffe_fpn_fcos-rpn_1x_coco
 ```

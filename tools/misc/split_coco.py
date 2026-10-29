@@ -70,7 +70,8 @@ def split_coco(data_root, out_dir, percent, fold):
     image_list = anns['images']
     labeled_total = int(percent / 100. * len(image_list))
     labeled_inds = set(
-        np.random.choice(range(len(image_list)), size=labeled_total))
+        np.random.choice(
+            range(len(image_list)), size=labeled_total, replace=False))
     labeled_ids, labeled_images, unlabeled_images = [], [], []
 
     for i in range(len(image_list)):

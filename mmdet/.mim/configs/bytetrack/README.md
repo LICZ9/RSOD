@@ -27,14 +27,9 @@ Multi-object tracking (MOT) aims at estimating bounding boxes and identities of 
 
 ## Results and models on MOT17
 
-Please note that the performance on `MOT17-half-val` is comparable with the performance reported in the manuscript, while the performance on `MOT17-test` is lower than the performance reported in the manuscript.
-
-The reason is that ByteTrack tunes customized hyper-parameters (e.g., image resolution and the high threshold of detection score) for each video in `MOT17-test` set, while we use unified parameters.
-
 |  Method   | Detector |           Train Set           |    Test Set    | Public | Inf time (fps) | HOTA | MOTA | IDF1 |  FP   |  FN   | IDSw. |                                         Config                                          |                                                                                                                                                           Download                                                                                                                                                           |
 | :-------: | :------: | :---------------------------: | :------------: | :----: | :------------: | :--: | :--: | :--: | :---: | :---: | :---: | :-------------------------------------------------------------------------------------: | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------: |
 | ByteTrack | YOLOX-X  | CrowdHuman + MOT17-half-train | MOT17-half-val |   N    |       -        | 67.5 | 78.6 | 78.5 | 12852 | 21060 |  672  | [config](bytetrack_yolox_x_8xb4-amp-80e_crowdhuman-mot17halftrain_test-mot17halfval.py) | [model](https://download.openmmlab.com/mmtracking/mot/bytetrack/bytetrack_yolox_x/bytetrack_yolox_x_crowdhuman_mot17-private-half_20211218_205500-1985c9f0.pth) \| [log](https://download.openmmlab.com/mmtracking/mot/bytetrack/bytetrack_yolox_x/bytetrack_yolox_x_crowdhuman_mot17-private-half_20211218_205500.log.json) |
-| ByteTrack | YOLOX-X  | CrowdHuman + MOT17-half-train |   MOT17-test   |   N    |       -        | 61.7 | 78.1 | 74.8 | 36705 | 85032 | 2049  |  [config](bytetrack_yolox_x_8xb4-amp-80e_crowdhuman-mot17halftrain_test-mot17test.py)   | [model](https://download.openmmlab.com/mmtracking/mot/bytetrack/bytetrack_yolox_x/bytetrack_yolox_x_crowdhuman_mot17-private-half_20211218_205500-1985c9f0.pth) \| [log](https://download.openmmlab.com/mmtracking/mot/bytetrack/bytetrack_yolox_x/bytetrack_yolox_x_crowdhuman_mot17-private-half_20211218_205500.log.json) |
 
 ## Results and models on MOT20
 
@@ -51,11 +46,11 @@ Please note that the MOTA on `MOT20-test` is slightly lower than that reported i
 
 ### 1. Development Environment Setup
 
-Tracking Development Environment Setup can refer to this [document](../../docs/en/get_started.md).
+Tracking Development Environment Setup can refer to this [document](../../../../docs/en/get_started.md).
 
 ### 2. Dataset Prepare
 
-Tracking Dataset Prepare can refer to this [document](../../docs/en/user_guides/tracking_dataset_prepare.md).
+Tracking Dataset Prepare can refer to this [document](../../../../docs/en/user_guides/tracking_dataset_prepare.md).
 
 ### 3. Training
 
@@ -68,7 +63,7 @@ Some algorithm like ByteTrack, OCSORT don't need reid model, so we provide joint
 ```shell
 # Training Bytetrack on crowdhuman and mot17-half-train dataset with following command
 # The number after config file represents the number of GPUs used. Here we use 8 GPUs
-bash tools/dist_train.sh configs/bytetrack/bytetrack_yolox_x_8xb4-80e_crowdhuman-mot17halftrain_test-mot17halfval.py 8
+bash tools/dist_train.sh mmdet/.mim/configs/bytetrack/bytetrack_yolox_x_8xb4-80e_crowdhuman-mot17halftrain_test-mot17halfval.py 8
 ```
 
 **3.2 Separate training and tracking**
@@ -78,11 +73,11 @@ Of course, we provide train detector independently like SORT, DeepSORT, StrongSO
 ```shell
 # Training Bytetrack on crowdhuman and mot17-half-train dataset with following command
 # The number after config file represents the number of GPUs used. Here we use 8 GPUs
-bash tools/dist_train.sh configs/bytetrack/yolox_x_8xb4-amp-80e_crowdhuman-mot17halftrain_test-mot17halfval.py 8
+bash tools/dist_train.sh mmdet/.mim/configs/bytetrack/yolox_x_8xb4-amp-80e_crowdhuman-mot17halftrain_test-mot17halfval.py 8
 ```
 
 If you want to know about more detailed usage of `train.py/dist_train.sh/slurm_train.sh`,
-please refer to this [document](../../docs/en/user_guides/tracking_train_test.md).
+please refer to this [document](../../../../docs/en/user_guides/tracking_train_test.md).
 
 ### 4. Testing and evaluation
 
@@ -91,13 +86,13 @@ please refer to this [document](../../docs/en/user_guides/tracking_train_test.md
 **4.1.1 use joint trained detector to evaluating and testing**
 
 ```shell
-bash tools/dist_test_tracking.sh configs/bytetrack/bytetrack_yolox_x_8xb4-amp-80e_crowdhuman-mot17halftrain_test-mot17halfval.py 8 --checkpoint ${CHECKPOINT_FILE}
+bash tools/dist_test_tracking.sh mmdet/.mim/configs/bytetrack/bytetrack_yolox_x_8xb4-amp-80e_crowdhuman-mot17halftrain_test-mot17halfval.py 8 --checkpoint ${CHECKPOINT_FILE}
 ```
 
 **4.1.2 use separate trained detector to evaluating and testing**
 
 ```shell
-bash tools/dist_test_tracking.sh configs/bytetrack/bytetrack_yolox_x_8xb4-amp-80e_crowdhuman-mot17halftrain_test-mot17halfval.py 8 --detector ${CHECKPOINT_FILE}
+bash tools/dist_test_tracking.sh mmdet/.mim/configs/bytetrack/bytetrack_yolox_x_8xb4-amp-80e_crowdhuman-mot17halftrain_test-mot17halfval.py 8 --detector ${CHECKPOINT_FILE}
 ```
 
 **4.1.3 use video_baesd to evaluating and testing**
@@ -110,23 +105,15 @@ val_dataloader = dict(
     sampler=dict(type='DefaultSampler', shuffle=False, round_up=False))
 ```
 
-#### 4.2 Example on MOTxx-test dataset
-
-If you want to get the results of the [MOT Challenge](https://motchallenge.net/) test set, please use the following command to generate result files that can be used for submission. It will be stored in `./mot_17_test_res`, you can modify the saved path in `test_evaluator` of the config.
-
-```shell
-bash tools/dist_test_tracking.sh configs/bytetrack/bytetrack_yolox_x_8xb4-amp-80e_crowdhuman-mot17halftrain_test-mot17test.py 8 --checkpoint ${CHECKPOINT_FILE}
-```
-
 If you want to know about more detailed usage of `test_tracking.py/dist_test_tracking.sh/slurm_test_tracking.sh`,
-please refer to this [document](../../docs/en/user_guides/tracking_train_test.md).
+please refer to this [document](../../../../docs/en/user_guides/tracking_train_test.md).
 
 ### 5.Inference
 
 Use a single GPU to predict a video and save it as a video.
 
 ```shell
-python demo/mot_demo.py demo/demo_mot.mp4 configs/bytetrack/bytetrack_yolox_x_8xb4-amp-80e_crowdhuman-mot17halftrain_test-mot17halfval.py --checkpoint ${CHECKPOINT_FILE} --out mot.mp4
+python mmdet/.mim/demo/mot_demo.py mmdet/.mim/demo/demo_mot.mp4 mmdet/.mim/configs/bytetrack/bytetrack_yolox_x_8xb4-amp-80e_crowdhuman-mot17halftrain_test-mot17halfval.py --checkpoint ${CHECKPOINT_FILE} --out mot.mp4
 ```
 
-If you want to know about more detailed usage of `mot_demo.py`, please refer to this [document](../../docs/en/user_guides/tracking_inference.md).
+If you want to know about more detailed usage of `mot_demo.py`, please refer to this [document](../../../../docs/en/user_guides/tracking_inference.md).

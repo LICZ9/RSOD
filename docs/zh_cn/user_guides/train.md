@@ -7,7 +7,7 @@ MMDetection 也为训练检测模型提供了开盖即食的工具。本节将�
 训练需要准备好数据集，细节请参考 [数据集准备](#%E6%95%B0%E6%8D%AE%E9%9B%86%E5%87%86%E5%A4%87) 。
 
 **注意**：
-目前，`configs/cityscapes` 文件夹下的配置文件都是使用 COCO 预训练权值进行初始化的。如果网络连接不可用或者速度很慢，你可以提前下载现存的模型。否则可能在训练的开始会有错误发生。
+目前，`mmdet/.mim/configs/cityscapes` 文件夹下的配置文件都是使用 COCO 预训练权值进行初始化的。如果网络连接不可用或者速度很慢，你可以提前下载现存的模型。否则可能在训练的开始会有错误发生。
 
 ### 学习率自动缩放
 
@@ -131,7 +131,7 @@ Slurm 是一个常见的计算集群调度系统。在 Slurm 管理的集群上�
 以下是在一个名称为 _dev_ 的 Slurm 分区上，使用 16 块 GPU 来训练 Mask R-CNN 的例子，并且将 `work-dir` 设置在了某些共享文件系统下。
 
 ```shell
-GPUS=16 ./tools/slurm_train.sh dev mask_r50_1x configs/mask_rcnn_r50_fpn_1x_coco.py /nfs/xxxx/mask_rcnn_r50_fpn_1x
+GPUS=16 ./tools/slurm_train.sh dev mask_r50_1x mmdet/.mim/configs/mask_rcnn/mask-rcnn_r50_fpn_1x_coco.py /nfs/xxxx/mask_rcnn_r50_fpn_1x
 ```
 
 你可以查看 [源码](https://github.com/open-mmlab/mmdetection/blob/main/tools/slurm_train.sh) 来检查全部的参数和环境变量.

@@ -1,7 +1,6 @@
 from mmdet.registry import MODELS
 import torch.nn as nn
 import torch
-import torch.nn.functional as F
 @MODELS.register_module()
 class ReliabilityAwareL1Loss(nn.Module):
     def __init__(self, reduction='mean', loss_weight=1.0):
@@ -13,7 +12,7 @@ class ReliabilityAwareL1Loss(nn.Module):
         """
         pred: (N, 4) 预测的边界框偏移量
         target: (N, 4) 目标偏移量
-        weight: (N,) 每个样本的可靠性权重
+        weight: (N,) 样本权重或 (N, 4) 坐标权重
         """
         assert reduction_override in (None, 'none', 'mean', 'sum')
         reduction = reduction_override or self.reduction
@@ -40,7 +39,7 @@ class ReliabilityAwareL1Loss(nn.Module):
         if reduction == 'mean':
             avg = loss.numel() if avg_factor is None else avg_factor
             loss = loss.sum() / avg
-        elif self.reduction == 'sum':
+        elif reduction == 'sum':
             loss = loss.sum()
             
         return self.loss_weight * loss

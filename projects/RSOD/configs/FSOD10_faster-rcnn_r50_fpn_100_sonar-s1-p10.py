@@ -30,8 +30,7 @@ detector.backbone = dict(
     style='caffe',
     init_cfg=dict(
         type='Pretrained',
-        # checkpoint='../ckpt/resnet50_msra-5891d200.pth'))
-        checkpoint='open-mmlab://resnet50_v1c'))  # 使用 MMDetection 提供的权重
+        checkpoint='open-mmlab://detectron2/resnet50_caffe'))
 
 model = dict(
     _delete_=True,
@@ -41,7 +40,6 @@ model = dict(
         type='MultiBranchDataPreprocessor',
         data_preprocessor=detector['data_preprocessor']),
     semi_train_cfg=dict(
-        compile=True,
         least_num=1,
         cache_size=8,
         mixup=True,
@@ -53,13 +51,16 @@ model = dict(
         erase_ratio=(0, 0.1),
         erase_thr=0.7,
         cls_pseudo_thr=0.7,
+        temp=0.6,
+        reliability_threshold=0.5,
+        non_overlap_threshold=0.2,
+        paste_occlusion_threshold=0.3,
         freeze_teacher=True,
         sup_weight=1.0,
         unsup_weight=2.0,
         min_pseudo_bbox_wh=(1e-2, 1e-2)),
     semi_test_cfg=dict(predict_on='teacher'))
 
-# 10% coco train2017 is set as labeled dataset
 labeled_dataset = _base_.labeled_dataset
 unlabeled_dataset = _base_.unlabeled_dataset
 labeled_dataset.ann_file = 'annotations/instances_10train.json'
@@ -82,13 +83,13 @@ test_cfg = dict(type='TestLoop')
 # learning rate policy
 param_scheduler = [
     dict(
-        type='LinearLR', start_factor=0.001, by_epoch=False, begin=0, end=500),
+        type='LinearLR', start_factor=0.25, by_epoch=False, begin=0, end=500),
 ]
 
 # optimizer
 optim_wrapper = dict(
     type='OptimWrapper',
-    optimizer=dict(type='SGD', lr=0.001, momentum=0.9, weight_decay=0.0001),
+    optimizer=dict(type='SGD', lr=0.01, momentum=0.9, weight_decay=0.0001),
     clip_grad=dict(max_norm=20, norm_type=2)
 )
 

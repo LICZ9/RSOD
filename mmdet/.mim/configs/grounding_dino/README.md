@@ -48,9 +48,9 @@ cd $MMDETROOT
 
 wget https://download.openmmlab.com/mmdetection/v3.0/grounding_dino/groundingdino_swint_ogc_mmdet-822d7e9d.pth
 
-python demo/image_demo.py \
-	demo/demo.jpg \
-	configs/grounding_dino/grounding_dino_swin-t_pretrain_obj365_goldg_cap4m.py \
+python mmdet/.mim/demo/image_demo.py \
+	mmdet/.mim/demo/demo.jpg \
+	mmdet/.mim/configs/grounding_dino/grounding_dino_swin-t_pretrain_obj365_goldg_cap4m.py \
 	--weights groundingdino_swint_ogc_mmdet-822d7e9d.pth \
 	--texts 'bench . car .'
 ```
@@ -107,7 +107,7 @@ The single image visualization is as follows:
 
 ```shell
 cd mmdetection
-python demo/image_demo.py data/cat/images/IMG_20211205_120756.jpg configs/grounding_dino/grounding_dino_swin-t_finetune_8xb2_20e_cat.py --weights https://download.openmmlab.com/mmdetection/v3.0/grounding_dino/groundingdino_swint_ogc_mmdet-822d7e9d.pth --texts cat.
+python mmdet/.mim/demo/image_demo.py data/cat/images/IMG_20211205_120756.jpg mmdet/.mim/configs/grounding_dino/grounding_dino_swin-t_finetune_8xb2_20e_cat.py --weights https://download.openmmlab.com/mmdetection/v3.0/grounding_dino/groundingdino_swint_ogc_mmdet-822d7e9d.pth --texts cat.
 ```
 
 <div align=center>
@@ -117,7 +117,7 @@ python demo/image_demo.py data/cat/images/IMG_20211205_120756.jpg configs/ground
 The test dataset evaluation on single card is as follows:
 
 ```shell
-python tools/test.py configs/grounding_dino/grounding_dino_swin-t_finetune_8xb2_20e_cat.py https://download.openmmlab.com/mmdetection/v3.0/grounding_dino/groundingdino_swint_ogc_mmdet-822d7e9d.pth
+python tools/test.py mmdet/.mim/configs/grounding_dino/grounding_dino_swin-t_finetune_8xb2_20e_cat.py https://download.openmmlab.com/mmdetection/v3.0/grounding_dino/groundingdino_swint_ogc_mmdet-822d7e9d.pth
 ```
 
 ```text
@@ -138,7 +138,7 @@ python tools/test.py configs/grounding_dino/grounding_dino_swin-t_finetune_8xb2_
 ### 4. Model Training and Visualization
 
 ```shell
-./tools/dist_train.sh configs/grounding_dino/grounding_dino_swin-t_finetune_8xb2_20e_cat.py 8 --work-dir cat_work_dir
+./tools/dist_train.sh mmdet/.mim/configs/grounding_dino/grounding_dino_swin-t_finetune_8xb2_20e_cat.py 8 --work-dir cat_work_dir
 ```
 
 The model will be saved based on the best performance on the test set. The performance of the best model (at epoch 16) is as follows:
@@ -164,7 +164,7 @@ If we do single image inference visualization again, the result is as follows:
 
 ```shell
 cd mmdetection
-python demo/image_demo.py data/cat/images/IMG_20211205_120756.jpg configs/grounding_dino/grounding_dino_swin-t_finetune_8xb2_20e_cat.py --weights cat_work_dir/best_coco_bbox_mAP_epoch_16.pth --texts cat.
+python mmdet/.mim/demo/image_demo.py data/cat/images/IMG_20211205_120756.jpg mmdet/.mim/configs/grounding_dino/grounding_dino_swin-t_finetune_8xb2_20e_cat.py --weights cat_work_dir/best_coco_bbox_mAP_epoch_16.pth --texts cat.
 ```
 
 <div align=center>

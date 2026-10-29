@@ -2,7 +2,7 @@
 
 Region proposal network (RPN) is a submodule in [Faster R-CNN](https://arxiv.org/abs/1506.01497), which generates proposals for the second stage of Faster R-CNN. Most two-stage detectors in MMDetection use [`RPNHead`](../../../mmdet/models/dense_heads/rpn_head.py) to generate proposals as RPN. However, any single-stage detector can serve as an RPN since their bounding box predictions can also be regarded as region proposals and thus be refined in the R-CNN. Therefore, MMDetection v3.0 supports that.
 
-To illustrate the whole process, here we give an example of how to use an anchor-free single-stage model [FCOS](../../../configs/fcos/fcos_r50-caffe_fpn_gn-head_1x_coco.py) as an RPN in [Faster R-CNN](../../../configs/faster_rcnn/faster-rcnn_r50_fpn_fcos-rpn_1x_coco.py).
+To illustrate the whole process, here we give an example of how to use an anchor-free single-stage model [FCOS](../../../mmdet/.mim/configs/fcos/fcos_r50-caffe_fpn_gn-head_1x_coco.py) as an RPN in [Faster R-CNN](../../../mmdet/.mim/configs/faster_rcnn/faster-rcnn_r50_fpn_fcos-rpn_1x_coco.py).
 
 The outline of this tutorial is as below:
 
@@ -10,9 +10,11 @@ The outline of this tutorial is as below:
 2. Evaluate proposals
 3. Train the customized Faster R-CNN with pre-trained FCOS
 
+Run the commands below in a Bash terminal from the project root. The examples use eight GPUs; adjust the `8` argument to the number available. Output paths are relative to the project root.
+
 ## Use `FCOSHead` as an `RPNHead` in Faster R-CNN
 
-To set `FCOSHead` as an `RPNHead` in Faster R-CNN, we should create a new config file named `configs/faster_rcnn/faster-rcnn_r50_fpn_fcos-rpn_1x_coco.py`, and replace with the setting of `rpn_head` with the setting of `bbox_head` in `configs/fcos/fcos_r50-caffe_fpn_gn-head_1x_coco.py`. Besides, we still use the neck setting of FCOS with strides of `[8, 16, 32, 64, 128]`, and update `featmap_strides` of `bbox_roi_extractor` to `[8, 16, 32, 64, 128]`. To avoid loss goes NAN, we apply warmup during the first 1000 iterations instead of the first 500 iterations, which means that the lr increases more slowly. The config is as follows:
+The project provides `mmdet/.mim/configs/faster_rcnn/faster-rcnn_r50_fpn_fcos-rpn_1x_coco.py`, which can be used directly by the training command in this section. It uses the FCOS `bbox_head` settings for the Faster R-CNN `rpn_head`, retains the FCOS neck strides of `[8,16,32,64,128]`, and updates `featmap_strides` of `bbox_roi_extractor` accordingly. Warmup lasts 1000 iterations instead of 500 so the learning rate increases more slowly. The relevant configuration is:
 
 ```python
 _base_ = [
@@ -22,7 +24,7 @@ _base_ = [
 ]
 
 model = dict(
-    # copied from configs/fcos/fcos_r50-caffe_fpn_gn-head_1x_coco.py
+    # copied from mmdet/.mim/configs/fcos/fcos_r50-caffe_fpn_gn-head_1x_coco.py
     neck=dict(
         start_level=1,
         add_extra_convs='on_output',  # use P5
@@ -64,28 +66,28 @@ param_scheduler = [
 
 Then, we could use the following command to train our customized model. For more training commands, please refer to [here](train.md).
 
-```python
-# training with 8 GPUS
-bash tools/dist_train.sh configs/faster_rcnn/faster-rcnn_r50_fpn_fcos-rpn_1x_coco.py \
+```bash
+bash tools/dist_train.sh \
+    mmdet/.mim/configs/faster_rcnn/faster-rcnn_r50_fpn_fcos-rpn_1x_coco.py \
     8 \
     --work-dir ./work_dirs/faster-rcnn_r50_fpn_fcos-rpn_1x_coco
 ```
 
 ## Evaluate proposals
 
-The quality of proposals is of great importance to the performance of detector, therefore, we also provide a way to evaluate proposals. Same as above, create a new config file named `configs/rpn/fcos-rpn_r50_fpn_1x_coco.py`, and replace with setting of `rpn_head` with the setting of `bbox_head` in `configs/fcos/fcos_r50-caffe_fpn_gn-head_1x_coco.py`.
+To evaluate proposal quality, create the `configs/rpn/` directory and save the following configuration as `configs/rpn/fcos-rpn_r50_fpn_1x_coco.py`. Its `rpn_head` uses the FCOS `bbox_head` settings, and its base configurations refer to this project's `mmdet/.mim/configs/_base_/` directory.
 
 ```python
 _base_ = [
-    '../_base_/models/rpn_r50_fpn.py', '../_base_/datasets/coco_detection.py',
-    '../_base_/schedules/schedule_1x.py', '../_base_/default_runtime.py'
+    '../../mmdet/.mim/configs/_base_/models/rpn_r50_fpn.py', '../../mmdet/.mim/configs/_base_/datasets/coco_detection.py',
+    '../../mmdet/.mim/configs/_base_/schedules/schedule_1x.py', '../../mmdet/.mim/configs/_base_/default_runtime.py'
 ]
 
 val_evaluator = dict(metric='proposal_fast')
 test_evaluator = val_evaluator
 
 model = dict(
-    # copied from configs/fcos/fcos_r50-caffe_fpn_gn-head_1x_coco.py
+    # copied from mmdet/.mim/configs/fcos/fcos_r50-caffe_fpn_gn-head_1x_coco.py
     neck=dict(
         start_level=1,
         add_extra_convs='on_output',  # use P5
@@ -111,8 +113,7 @@ model = dict(
 
 Suppose we have the checkpoint `./work_dirs/faster-rcnn_r50_fpn_fcos-rpn_1x_coco/epoch_12.pth` after training, then we can evaluate the quality of proposals with the following command.
 
-```python
-# testing with 8 GPUs
+```bash
 bash tools/dist_test.sh \
     configs/rpn/fcos-rpn_r50_fpn_1x_coco.py \
     ./work_dirs/faster-rcnn_r50_fpn_fcos-rpn_1x_coco/epoch_12.pth \
@@ -121,13 +122,13 @@ bash tools/dist_test.sh \
 
 ## Train the customized Faster R-CNN with pre-trained FCOS
 
-Pre-training not only speeds up convergence of training, but also improves the performance of the detector. Therefore, here we give an example to illustrate how to do use a pre-trained FCOS as an RPN to accelerate training and improve the accuracy. Suppose we want to use `FCOSHead` as an rpn head in Faster R-CNN and train with the pre-trained [`fcos_r50-caffe_fpn_gn-head_1x_coco`](https://download.openmmlab.com/mmdetection/v2.0/fcos/fcos_r50_caffe_fpn_gn-head_1x_coco/fcos_r50_caffe_fpn_gn-head_1x_coco-821213aa.pth). The content of config file named `configs/faster_rcnn/faster-rcnn_r50-caffe_fpn_fcos-rpn_1x_coco.py` is as the following. Note that `fcos_r50-caffe_fpn_gn-head_1x_coco` uses a caffe version of ResNet50, the pixel mean and std in `data_preprocessor` thus need to be updated.
+This example uses `FCOSHead` as the Faster R-CNN `rpn_head` and loads pre-trained FCOS weights. Create the `configs/faster_rcnn/` directory and save the following configuration as `configs/faster_rcnn/faster-rcnn_r50-caffe_fpn_fcos-rpn_1x_coco.py`. The pre-trained model uses the Caffe variant of ResNet50, so the pixel mean and standard deviation in `data_preprocessor` must match it.
 
 ```python
 _base_ = [
-    '../_base_/models/faster-rcnn_r50_fpn.py',
-    '../_base_/datasets/coco_detection.py',
-    '../_base_/schedules/schedule_1x.py', '../_base_/default_runtime.py'
+    '../../mmdet/.mim/configs/_base_/models/faster-rcnn_r50_fpn.py',
+    '../../mmdet/.mim/configs/_base_/datasets/coco_detection.py',
+    '../../mmdet/.mim/configs/_base_/schedules/schedule_1x.py', '../../mmdet/.mim/configs/_base_/default_runtime.py'
 ]
 
 model = dict(
@@ -168,7 +169,7 @@ load_from = 'https://download.openmmlab.com/mmdetection/v2.0/fcos/fcos_r50_caffe
 
 The command for training is as below.
 
-```python
+```bash
 bash tools/dist_train.sh \
     configs/faster_rcnn/faster-rcnn_r50-caffe_fpn_fcos-rpn_1x_coco.py \
     8 \

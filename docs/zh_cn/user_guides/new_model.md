@@ -115,11 +115,11 @@ neck=dict(
     num_outs=5)
 ```
 
-关于自定义模型其余相关细节例如实现新的骨架网络，头部网络、损失函数，以及运行时训练配置例如定义新的优化器、使用梯度裁剪、定制训练调度策略和钩子等，请参考文档 [自定义模型](tutorials/customize_models.md) 和 [自定义运行时训练配置](tutorials/customize_runtime.md)。
+关于自定义模型其余相关细节例如实现新的骨架网络，头部网络、损失函数，以及运行时训练配置例如定义新的优化器、使用梯度裁剪、定制训练调度策略和钩子等，请参考文档 [自定义模型](../advanced_guides/customize_models.md) 和 [自定义运行时训练配置](../advanced_guides/customize_runtime.md)。
 
 ## 准备配置文件
 
-第三步是准备训练配置所需要的配置文件。假设你打算基于 cityscapes 数据集，在 Cascade Mask R-CNN R50 中新增 `AugFPN` 模块，同时增加 `Rotate` 或者 `Translate` 数据增强策略，假设你的配置文件位于 `configs/cityscapes/` 目录下，并且取名为 `cascade-mask-rcnn_r50_augfpn_autoaug-10e_cityscapes.py`，则配置信息如下：
+第三步是准备训练配置所需要的配置文件。假设你打算基于 cityscapes 数据集，在 Cascade Mask R-CNN R50 中新增 `AugFPN` 模块，同时增加 `Rotate` 或者 `Translate` 数据增强策略，假设你的配置文件位于 `mmdet/.mim/configs/cityscapes` 目录下，并且取名为 `cascade-mask-rcnn_r50_augfpn_autoaug-10e_cityscapes.py`，则配置信息如下：
 
 ```python
 # 继承 base 配置，然后进行针对性修改
@@ -276,7 +276,7 @@ load_from = 'https://download.openmmlab.com/mmdetection/v2.0/cascade_rcnn/cascad
 python tools/train.py configs/cityscapes/cascade-mask-rcnn_r50_augfpn_autoaug-10e_cityscapes.py
 ```
 
-如果想了解更多用法，可以参考 [例子1](1_exist_data_model.md)。
+如果想了解更多用法，可以参考 [例子1](../get_started.md)。
 
 ## 测试和推理
 
@@ -286,4 +286,4 @@ python tools/train.py configs/cityscapes/cascade-mask-rcnn_r50_augfpn_autoaug-10
 python tools/test.py configs/cityscapes/cascade-mask-rcnn_r50_augfpn_autoaug-10e_cityscapes.py work_dirs/cascade-mask-rcnn_r50_augfpn_autoaug-10e_cityscapes/epoch_10.pth
 ```
 
-如果想了解更多用法，可以参考 [例子1](1_exist_data_model.md)。
+如果想了解更多用法，可以参考 [例子1](../get_started.md)。

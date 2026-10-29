@@ -1,6 +1,10 @@
+_base_ = []
+
+import os
+
 # dataset settings
 dataset_type = 'CocoDataset'
-data_root = 'ROOT_PATH_OF_DATASET'
+data_root = os.path.expanduser(os.getenv('RSOD_DATA_ROOT', 'data/sonar'))
 
 backend_args = None
 
@@ -64,13 +68,14 @@ weak_pipeline = [
 strong_pipeline = [
     dict(type='RandomResize', scale=scale, keep_ratio=True),
     dict(type='RandomFlip', prob=0.5),
+    dict(type='RandomGaussianBlur', prob=0.5, kernel_size=5,
+         sigma_range=(0.1, 2.0)),
     dict(
         type='RandomOrder',
         transforms=[
             dict(type='RandAugment', aug_space=color_space, aug_num=1),
             dict(type='RandAugment', aug_space=geometric, aug_num=1),
         ]),
-    # dict(type='RandomErasing', n_patches=(1, 5), ratio=(0, 0.2)),
     dict(type='FilterAnnotations', min_gt_bbox_wh=(1e-2, 1e-2)),
     dict(
         type='PackDetInputs',
@@ -82,7 +87,6 @@ strong_pipeline = [
 # pipeline used to augment unlabeled data into different views
 unsup_pipeline = [
     dict(type='LoadImageFromFile'),
-    # dict(type='LoadEmptyAnnotations'),
     dict(type='LoadAnnotations', with_bbox=True),
     dict(
         type='MultiBranch',
@@ -167,11 +171,11 @@ test_dataloader = dict(
 
 val_evaluator = dict(
     type='CocoMetric',
-    ann_file=data_root + 'annotations/instances_val.json',
+    ann_file=os.path.join(data_root, 'annotations', 'instances_val.json'),
     metric='bbox',
     format_only=False)
 test_evaluator = dict(
     type='CocoMetric',
-    ann_file=data_root + 'annotations/instances_test.json',
+    ann_file=os.path.join(data_root, 'annotations', 'instances_test.json'),
     metric='bbox',
     format_only=False)

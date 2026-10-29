@@ -30,7 +30,7 @@ The code and more details can be found [here](https://github.com/GothicAi/Instab
 
 ### Integration with MMDetection
 
-InstaBoost have been already integrated in the data pipeline, thus all you need is to add or change **InstaBoost** configurations after **LoadImageFromFile**. We have provided examples like [this](mask_rcnn_r50_fpn_instaboost_4x#L121). You can refer to [`InstaBoostConfig`](https://github.com/GothicAi/InstaBoost-pypi#instaboostconfig) for more details.
+InstaBoost have been already integrated in the data pipeline, thus all you need is to add or change **InstaBoost** configurations after **LoadImageFromFile**. We have provided examples like [this](mask-rcnn_r50_fpn_instaboost-4x_coco.py). You can refer to [`InstaBoostConfig`](https://github.com/GothicAi/InstaBoost-pypi#instaboostconfig) for more details.
 
 ## Results and Models
 

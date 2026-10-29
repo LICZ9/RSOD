@@ -499,8 +499,8 @@ class TestLoadEmptyAnnotations(unittest.TestCase):
 class TestLoadTrackAnnotations(unittest.TestCase):
 
     def setUp(self):
-        data_prefix = osp.join(osp.dirname(__file__), '../data')
-        seg_map = osp.join(data_prefix, 'grayscale.jpg')
+        data_prefix = osp.join(osp.dirname(__file__), '../../data')
+        seg_map = osp.join(data_prefix, 'gray.jpg')
         self.results = {
             'seg_map_path':
             seg_map,

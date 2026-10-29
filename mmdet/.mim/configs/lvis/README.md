@@ -14,7 +14,7 @@ Progress on object detection is enabled by datasets that focus the research comm
 
 ## Common Setting
 
-- Please follow [install guide](../../docs/get_started.md#install-mmdetection) to install open-mmlab forked cocoapi first.
+- Please follow [install guide](../../../../docs/en/get_started.md) to install open-mmlab forked cocoapi first.
 
 - Run following scripts to install our forked lvis-api.
 
@@ -22,7 +22,7 @@ Progress on object detection is enabled by datasets that focus the research comm
   pip install git+https://github.com/lvis-dataset/lvis-api.git
   ```
 
-- All experiments use oversample strategy [here](../../docs/tutorials/customize_dataset.md#class-balanced-dataset) with oversample threshold `1e-3`.
+- All experiments use oversample strategy [here](../../../../docs/en/advanced_guides/customize_dataset.md#class-balanced-dataset) with oversample threshold `1e-3`.
 
 - The size of LVIS v0.5 is half of COCO, so schedule `2x` in LVIS is roughly the same iterations as `1x` in COCO.
 

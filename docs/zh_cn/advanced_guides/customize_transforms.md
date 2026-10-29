@@ -42,6 +42,6 @@
 
 3. 可视化数据增强处理流程的结果
 
-   如果想要可视化数据增强处理流程的结果，可以使用 `tools/misc/browse_dataset.py` 直观
+   如果想要可视化数据增强处理流程的结果，可以使用 `tools/analysis_tools/browse_dataset.py` 直观
    地浏览检测数据集（图像和标注信息），或将图像保存到指定目录。
    使用方法请参考[可视化文档](../user_guides/visualization.md)

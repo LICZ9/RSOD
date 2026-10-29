@@ -374,7 +374,7 @@ resume = False  # 是否从 `load_from` 中定义的检查点恢复。 如果 `l
 
 MMEngine 的 Runner 除了基于轮次的训练循环（epoch）外，还提供了基于迭代（iteration）的训练循环。
 要使用基于迭代的训练，用户应该修改 `train_cfg`、`param_scheduler`、`train_dataloader`、`default_hooks` 和 `log_processor`。
-以下是将基于 epoch 的 RetinaNet 配置更改为基于 iteration 的示例：configs/retinanet/retinanet_r50_fpn_90k_coco.py
+以下是将基于 epoch 的 RetinaNet 配置更改为基于 iteration 的示例：mmdet/.mim/configs/retinanet/retinanet_r50_fpn_90k_coco.py
 
 ```python
 # iter-based 训练配置

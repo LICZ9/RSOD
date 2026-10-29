@@ -4,7 +4,7 @@
 
 本节中，我们将演示如何用 PyTorch 准备一个环境。
 
-MMDetection 支持在 Linux，Windows 和 macOS 上运行。它需要 Python 3.7 以上，CUDA 9.2 以上和 PyTorch 1.8 及其以上。
+MMDetection 支持在 Linux，Windows 和 macOS 上运行。它需要 Python 3.9 及以上，CUDA 9.2 以上和 PyTorch 1.8 及其以上。
 
 ```{note}
 如果你对 PyTorch 有经验并且已经安装了它，你可以直接跳转到[下一小节](#安装流程)。否则，你可以按照下述步骤进行准备。
@@ -15,7 +15,7 @@ MMDetection 支持在 Linux，Windows 和 macOS 上运行。它需要 Python 3.7
 **步骤 1.** 创建并激活一个 conda 环境。
 
 ```shell
-conda create --name openmmlab python=3.8 -y
+conda create --name openmmlab python=3.9.24 -y
 conda activate openmmlab
 ```
 
@@ -84,7 +84,7 @@ mim download mmdet --config rtmdet_tiny_8xb32-300e_coco --dest .
 方案 a：如果你通过源码安装的 MMDetection，那么直接运行以下命令进行验证：
 
 ```shell
-python demo/image_demo.py demo/demo.jpg rtmdet_tiny_8xb32-300e_coco.py --weights rtmdet_tiny_8xb32-300e_coco_20220902_112414-78e30dcc.pth --device cpu
+python mmdet/.mim/demo/image_demo.py mmdet/.mim/demo/demo.jpg rtmdet_tiny_8xb32-300e_coco.py --weights rtmdet_tiny_8xb32-300e_coco_20220902_112414-78e30dcc.pth --device cpu
 ```
 
 你会在当前文件夹中的 `outputs/vis` 文件夹中看到一个新的图像 `demo.jpg`，图像中包含有网络预测的检测框。
@@ -97,7 +97,7 @@ from mmdet.apis import init_detector, inference_detector
 config_file = 'rtmdet_tiny_8xb32-300e_coco.py'
 checkpoint_file = 'rtmdet_tiny_8xb32-300e_coco_20220902_112414-78e30dcc.pth'
 model = init_detector(config_file, checkpoint_file, device='cpu')  # or device='cuda:0'
-inference_detector(model, 'demo/demo.jpg')
+inference_detector(model, 'mmdet/.mim/demo/demo.jpg')
 ```
 
 你将会看到一个包含 `DetDataSample` 的列表，预测结果在 `pred_instance` 里，包含有检测框，类别和得分。
@@ -201,7 +201,7 @@ print(mmdet.__version__)
 
 #### 通过 Docker 使用 MMDetection
 
-我们提供了一个 [Dockerfile](../../docker/Dockerfile) 来构建一个镜像。请确保你的 [docker 版本](https://docs.docker.com/engine/install/) >=19.03。
+我们提供了一个 [Dockerfile](https://github.com/open-mmlab/mmdetection/blob/v3.2.0/docker/Dockerfile) 来构建一个镜像。请确保你的 [docker 版本](https://docs.docker.com/engine/install/) >=19.03。
 
 ```shell
 # 基于 PyTorch 1.9，CUDA 11.1 构建镜像

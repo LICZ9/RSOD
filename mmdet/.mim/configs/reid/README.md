@@ -4,13 +4,13 @@ You may want to train a ReID model for multiple object tracking or other applica
 
 ### 1. Development Environment Setup
 
-Tracking Development Environment Setup can refer to this [document](../../docs/en/get_started.md).
+Tracking Development Environment Setup can refer to this [document](../../../../docs/en/get_started.md).
 
 ### 2. Dataset Preparation
 
 This section will show how to train a ReID model on standard datasets i.e. MOT17.
 
-We need to download datasets following docs. We use [ReIDDataset](mmdet/datasets/reid_dataset.py) to maintain standard datasets. In this case, you need to convert the official dataset to this style. We provide scripts and the usages as follow:
+We need to download datasets following docs. We use [ReIDDataset](../../../datasets/reid_dataset.py) to maintain standard datasets. In this case, you need to convert the official dataset to this style. We provide scripts and the usages as follow:
 
 ```python
 python tools/dataset_converters/mot2reid.py -i ./data/MOT17/ -o ./data/MOT17/reid --val-split 0.2 --vis-threshold 0.3
@@ -62,7 +62,7 @@ Note: Images in `MOT17/reid/imgs` are cropped from raw images in `MOT17/train` b
 #### Training on a single GPU
 
 ```shell
-python tools/train.py configs/reid/reid_r50_8xb32-6e_mot17train80_test-mot17val20.py
+python tools/train.py mmdet/.mim/configs/reid/reid_r50_8xb32-6e_mot17train80_test-mot17val20.py
 ```
 
 #### Training on multiple GPUs
@@ -71,7 +71,7 @@ We provide `tools/dist_train.sh` to launch training on multiple GPUs.
 The basic usage is as follows.
 
 ```shell
-bash tools/dist_train.sh configs/reid/reid_r50_8xb32-6e_mot17train80_test-mot17val20.py 8
+bash tools/dist_train.sh mmdet/.mim/configs/reid/reid_r50_8xb32-6e_mot17train80_test-mot17val20.py 8
 ```
 
 ### 4. Customize Dataset
@@ -111,7 +111,7 @@ person2/000000.jpg 1
 person2/000001.jpg 1
 ```
 
-You can directly use [ReIDDataset](mmdet/datasets/reid_dataset.py). In this case, you only need to modify the config as follows:
+You can directly use [ReIDDataset](../../../datasets/reid_dataset.py). In this case, you only need to modify the config as follows:
 
 ```python
 # modify the path of annotation files and the image path prefix

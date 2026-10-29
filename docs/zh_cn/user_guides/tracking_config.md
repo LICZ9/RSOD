@@ -42,7 +42,7 @@
 
 ## 通过脚本参数修改配置
 
-当使用 `tools/train.py` 或 `tools/test_trackin.py` 执行任务时，可以指定 `--cfg-options` 来就地修改配置。我们举几个例子如下。有关更多详细信息，请参阅[MMEngine](https://mmengine.readthedocs.io/zh_CN/latest/advanced_tutorials/config.html)。
+当使用 `tools/train.py` 或 `tools/test_tracking.py` 执行任务时，可以指定 `--cfg-options` 来就地修改配置。我们举几个例子如下。有关更多详细信息，请参阅[MMEngine](https://mmengine.readthedocs.io/zh_CN/latest/advanced_tutorials/config.html)。
 
 ### 更新 dict 链的配置键
 

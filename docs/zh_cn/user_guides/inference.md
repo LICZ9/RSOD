@@ -12,7 +12,7 @@ MMDetection 提供了许多预训练好的检测模型，可以在 [Model Zoo](h
 ## 推理的高层编程接口——推理器
 
 在 OpenMMLab 中，所有的推理操作都被统一到了推理器 `Inferencer` 中。推理器被设计成为一个简洁易用的 API，它在不同的 OpenMMLab 库中都有着非常相似的接口。
-下面介绍的演示样例都放在 [demo/inference_demo.ipynb](https://github.com/open-mmlab/mmdetection/blob/main/demo/inference_demo.ipynb) 中方便大家尝试。
+下面介绍的演示样例都放在 [mmdet/.mim/demo/inference_demo.ipynb](https://github.com/open-mmlab/mmdetection/blob/main/demo/inference_demo.ipynb) 中方便大家尝试。
 
 ### 基础用法
 
@@ -25,7 +25,7 @@ from mmdet.apis import DetInferencer
 inferencer = DetInferencer('rtmdet_tiny_8xb32-300e_coco')
 
 # 推理示例图片
-inferencer('demo/demo.jpg', show=True)
+inferencer('mmdet/.mim/demo/demo.jpg', show=True)
 ```
 
 可视化结果将被显示在一个新窗口中：
@@ -105,14 +105,14 @@ inferencer = DetInferencer(model='rtmdet_tiny_8xb32-300e_coco', device='cpu')
 - str: 图像的路径/URL。
 
   ```python
-  inferencer('demo/demo.jpg')
+  inferencer('mmdet/.mim/demo/demo.jpg')
   ```
 
 - array: 图像的 numpy 数组。它应该是 BGR 格式。
 
   ```python
   import mmcv
-  array = mmcv.imread('demo/demo.jpg')
+  array = mmcv.imread('mmdet/.mim/demo/demo.jpg')
   inferencer(array)
   ```
 
@@ -155,14 +155,14 @@ inferencer = DetInferencer(model='rtmdet_tiny_8xb32-300e_coco', device='cpu')
   }
 ```
 
-如果你想要从模型中获取原始输出，可以将 `return_datasamples` 设置为 `True` 来获取原始的 [DataSample](advanced_guides/structures.md)，它将存储在 `predictions` 中。
+如果你想要从模型中获取原始输出，可以将 `return_datasamples` 设置为 `True` 来获取原始的 [DataSample](../advanced_guides/structures.md)，它将存储在 `predictions` 中。
 
 #### 储存结果
 
 除了从返回值中获取预测结果，你还可以通过设置 `out_dir` 和 `no_save_pred`/`no_save_vis` 参数将预测结果和可视化结果导出到文件中。
 
 ```python
-inferencer('demo/demo.jpg', out_dir='outputs/', no_save_pred=False)
+inferencer('mmdet/.mim/demo/demo.jpg', out_dir='outputs/', no_save_pred=False)
 ```
 
 结果目录结构如下：
@@ -187,7 +187,7 @@ outputs
 
 | 参数            | 类型       | 默认值  | 描述                                                                                                                                                                                                                        |
 | --------------- | ---------- | ------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `model`         | str , 可选 | None    | 配置文件的路径或 metafile 中定义的模型名称。例如，可以是 'rtmdet-s' 或 'rtmdet_s_8xb32-300e_coco' 或 'configs/rtmdet/rtmdet_s_8xb32-300e_coco.py'。如果未指定模型，用户必须提供 MMEngine 保存的包含配置字符串的 "weights"。 |
+| `model`         | str , 可选 | None    | 配置文件的路径或 metafile 中定义的模型名称。例如，可以是 'rtmdet-s' 或 'rtmdet_s_8xb32-300e_coco' 或 'mmdet/.mim/configs/rtmdet/rtmdet_s_8xb32-300e_coco.py'。如果未指定模型，用户必须提供 MMEngine 保存的包含配置字符串的 "weights"。 |
 | `weights`       | str, 可选  | None    | 模型权重文件的路径。如果未指定且 `model` 是 metafile 中的模型名称，权重将从 metafile 中加载。                                                                                                                               |
 | `device`        | str, 可选  | None    | 推理使用的设备，接受 `torch.device` 允许的所有字符串。例如，'cuda:0' 或 'cpu'。如果为 None，将自动使用可用设备。 默认为 None。                                                                                              |
 | `scope`         | str, 可选  | 'mmdet' | 模型的”域名“。                                                                                                                                                                                                              |
@@ -224,7 +224,7 @@ outputs
 这是在单张图片上进行推理的脚本。
 
 ```shell
-python demo/image_demo.py \
+python mmdet/.mim/demo/image_demo.py \
     ${IMAGE_FILE} \
     ${CONFIG_FILE} \
     [--weights ${WEIGHTS}] \
@@ -235,8 +235,8 @@ python demo/image_demo.py \
 运行样例：
 
 ```shell
-python demo/image_demo.py demo/demo.jpg \
-    configs/rtmdet/rtmdet_l_8xb32-300e_coco.py \
+python mmdet/.mim/demo/image_demo.py mmdet/.mim/demo/demo.jpg \
+    mmdet/.mim/configs/rtmdet/rtmdet_l_8xb32-300e_coco.py \
     --weights checkpoints/rtmdet_l_8xb32-300e_coco_20220719_112030-5a0be7c4.pth \
     --device cpu
 ```
@@ -246,7 +246,7 @@ python demo/image_demo.py demo/demo.jpg \
 这是使用摄像头实时图片的推理脚本。
 
 ```shell
-python demo/webcam_demo.py \
+python mmdet/.mim/demo/webcam_demo.py \
     ${CONFIG_FILE} \
     ${CHECKPOINT_FILE} \
     [--device ${GPU_ID}] \
@@ -257,8 +257,8 @@ python demo/webcam_demo.py \
 运行样例：
 
 ```shell
-python demo/webcam_demo.py \
-    configs/rtmdet/rtmdet_l_8xb32-300e_coco.py \
+python mmdet/.mim/demo/webcam_demo.py \
+    mmdet/.mim/configs/rtmdet/rtmdet_l_8xb32-300e_coco.py \
     checkpoints/rtmdet_l_8xb32-300e_coco_20220719_112030-5a0be7c4.pth
 ```
 
@@ -267,7 +267,7 @@ python demo/webcam_demo.py \
 这是在视频样例上进行推理的脚本。
 
 ```shell
-python demo/video_demo.py \
+python mmdet/.mim/demo/video_demo.py \
     ${VIDEO_FILE} \
     ${CONFIG_FILE} \
     ${CHECKPOINT_FILE} \
@@ -281,8 +281,8 @@ python demo/video_demo.py \
 运行样例：
 
 ```shell
-python demo/video_demo.py demo/demo.mp4 \
-    configs/rtmdet/rtmdet_l_8xb32-300e_coco.py \
+python mmdet/.mim/demo/video_demo.py mmdet/.mim/demo/demo.mp4 \
+    mmdet/.mim/configs/rtmdet/rtmdet_l_8xb32-300e_coco.py \
     checkpoints/rtmdet_l_8xb32-300e_coco_20220719_112030-5a0be7c4.pth \
     --out result.mp4
 ```
@@ -292,7 +292,7 @@ python demo/video_demo.py demo/demo.mp4 \
 这是在视频样例上进行推理的脚本，使用显卡加速。
 
 ```shell
-python demo/video_gpuaccel_demo.py \
+python mmdet/.mim/demo/video_gpuaccel_demo.py \
      ${VIDEO_FILE} \
      ${CONFIG_FILE} \
      ${CHECKPOINT_FILE} \
@@ -308,8 +308,8 @@ python demo/video_gpuaccel_demo.py \
 运行样例：
 
 ```shell
-python demo/video_gpuaccel_demo.py demo/demo.mp4 \
-    configs/rtmdet/rtmdet_l_8xb32-300e_coco.py \
+python mmdet/.mim/demo/video_gpuaccel_demo.py mmdet/.mim/demo/demo.mp4 \
+    mmdet/.mim/configs/rtmdet/rtmdet_l_8xb32-300e_coco.py \
     checkpoints/rtmdet_l_8xb32-300e_coco_20220719_112030-5a0be7c4.pth \
     --nvdecode --out result.mp4
 ```
@@ -319,7 +319,7 @@ python demo/video_gpuaccel_demo.py demo/demo.mp4 \
 这是在大图上进行切片推理的脚本。
 
 ```shell
-python demo/large_image_demo.py \
+python mmdet/.mim/demo/large_image_demo.py \
 	${IMG_PATH} \
 	${CONFIG_FILE} \
 	${CHECKPOINT_FILE} \
@@ -342,23 +342,23 @@ python demo/large_image_demo.py \
 # inferecnce without tta
 wget -P checkpoint https://download.openmmlab.com/mmdetection/v2.0/faster_rcnn/faster_rcnn_r101_fpn_2x_coco/faster_rcnn_r101_fpn_2x_coco_bbox_mAP-0.398_20200504_210455-1d2dac9c.pth
 
-python demo/large_image_demo.py \
-    demo/large_image.jpg \
-    configs/faster_rcnn/faster-rcnn_r101_fpn_2x_coco.py \
+python mmdet/.mim/demo/large_image_demo.py \
+    mmdet/.mim/demo/large_image.jpg \
+    mmdet/.mim/configs/faster_rcnn/faster-rcnn_r101_fpn_2x_coco.py \
     checkpoint/faster_rcnn_r101_fpn_2x_coco_bbox_mAP-0.398_20200504_210455-1d2dac9c.pth
 
 # inference with tta
 wget -P checkpoint https://download.openmmlab.com/mmdetection/v2.0/retinanet/retinanet_r50_fpn_1x_coco/retinanet_r50_fpn_1x_coco_20200130-c2398f9e.pth
 
-python demo/large_image_demo.py \
-    demo/large_image.jpg \
-    configs/retinanet/retinanet_r50_fpn_1x_coco.py \
+python mmdet/.mim/demo/large_image_demo.py \
+    mmdet/.mim/demo/large_image.jpg \
+    mmdet/.mim/configs/retinanet/retinanet_r50_fpn_1x_coco.py \
     checkpoint/retinanet_r50_fpn_1x_coco_20200130-c2398f9e.pth --tta
 ```
 
 ## 多模态算法的推理和验证
 
-随着多模态视觉算法的不断发展，MMDetection 也完成了对这类算法的支持。这一小节我们通过 GLIP 算法和模型来演示如何使用对应多模态算法的 demo 和 eval 脚本。同时 MMDetection 也在 projects 下完成了 [gradio_demo 项目](../../../projects/gradio_demo/)，用户可以参照[文档](../../../projects/gradio_demo/README.md)在本地快速体验 MMDetection 中支持的各类图片输入的任务。
+随着多模态视觉算法的不断发展，MMDetection 也完成了对这类算法的支持。这一小节我们通过 GLIP 算法和模型来演示如何使用对应多模态算法的 demo 和 eval 脚本。同时 MMDetection 也在 projects 下完成了 [gradio_demo 项目](../../../mmdet/.mim/demo)，用户可以参照[文档](https://github.com/open-mmlab/mmdetection/blob/v3.2.0/projects/gradio_demo/README.md)在本地快速体验 MMDetection 中支持的各类图片输入的任务。
 
 ### 模型准备
 
@@ -384,7 +384,7 @@ wget https://download.openmmlab.com/mmdetection/v3.0/glip/glip_tiny_a_mmdet-b365
 下载完成后我们就可以利用 `demo` 下的多模态推理脚本完成推理：
 
 ```shell
-python demo/image_demo.py demo/demo.jpg glip_tiny_a_mmdet-b3654169.pth --texts bench
+python mmdet/.mim/demo/image_demo.py mmdet/.mim/demo/demo.jpg glip_tiny_a_mmdet-b3654169.pth --texts bench
 ```
 
 demo 效果如下图所示：
@@ -396,7 +396,7 @@ demo 效果如下图所示：
 如果想进行多种类型的识别，需要使用 `xx. xx` 的格式在 `--texts` 字段后声明目标类型:
 
 ```shell
-python demo/image_demo.py demo/demo.jpg glip_tiny_a_mmdet-b3654169.pth --texts 'bench. car'
+python mmdet/.mim/demo/image_demo.py mmdet/.mim/demo/demo.jpg glip_tiny_a_mmdet-b3654169.pth --texts 'bench. car'
 ```
 
 结果如下图所示：
@@ -408,7 +408,7 @@ python demo/image_demo.py demo/demo.jpg glip_tiny_a_mmdet-b3654169.pth --texts '
 推理脚本还支持输入一个句子作为 `--texts` 字段的输入：
 
 ```shell
-python demo/image_demo.py demo/demo.jpg glip_tiny_a_mmdet-b3654169.pth --texts 'There are a lot of cars here.'
+python mmdet/.mim/demo/image_demo.py mmdet/.mim/demo/demo.jpg glip_tiny_a_mmdet-b3654169.pth --texts 'There are a lot of cars here.'
 ```
 
 结果可以参考下图：
@@ -431,8 +431,8 @@ MMDetection 支持后的 GLIP 算法对比官方版本没有精度上的损失�
 
 ```shell
 # 1 gpu
-python tools/test.py configs/glip/glip_atss_swin-t_fpn_dyhead_pretrain_obj365.py glip_tiny_a_mmdet-b3654169.pth
+python tools/test.py mmdet/.mim/configs/glip/glip_atss_swin-t_a_fpn_dyhead_pretrain_obj365.py glip_tiny_a_mmdet-b3654169.pth
 
 # 8 GPU
-./tools/dist_test.sh configs/glip/glip_atss_swin-t_fpn_dyhead_pretrain_obj365.py glip_tiny_a_mmdet-b3654169.pth 8
+./tools/dist_test.sh mmdet/.mim/configs/glip/glip_atss_swin-t_a_fpn_dyhead_pretrain_obj365.py glip_tiny_a_mmdet-b3654169.pth 8
 ```

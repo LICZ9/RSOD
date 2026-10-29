@@ -34,7 +34,7 @@ model = dict(
 
 ## Use backbone network in TIMM through MMPretrain
 
-MMPretrain also provides a wrapper for the PyTorch Image Models (timm) backbone network, users can directly use the backbone network in timm through MMPretrain. Suppose you want to use [EfficientNet-B1](../../../configs/timm_example/retinanet_timm-efficientnet-b1_fpn_1x_coco.py) as the backbone network of RetinaNet, the example config is as the following.
+MMPretrain also provides a wrapper for the PyTorch Image Models (timm) backbone network, users can directly use the backbone network in timm through MMPretrain. Suppose you want to use [EfficientNet-B1](../../../mmdet/.mim/configs/timm_example/retinanet_timm-efficientnet-b1_fpn_1x_coco.py) as the backbone network of RetinaNet, the example config is as the following.
 
 ```python
 # https://github.com/open-mmlab/mmdetection/blob/main/configs/timm_example/retinanet_timm-efficientnet-b1_fpn_1x_coco.py
@@ -70,7 +70,7 @@ For the principle of the Hierarchy Registry, please refer to the [MMEngine docum
 If you want to use `Mosaic` in training, please make sure that you use `MultiImageMixDataset` at the same time. Taking the 'Faster R-CNN' algorithm as an example, you should modify the values of `train_pipeline` and `train_dataset` in the config as below:
 
 ```python
-# Open configs/faster_rcnn/faster-rcnn_r50_fpn_1x_coco.py directly and add the following fields
+# Open mmdet/.mim/configs/faster_rcnn/faster-rcnn_r50_fpn_1x_coco.py directly and add the following fields
 data_root = 'data/coco/'
 dataset_type = 'CocoDataset'
 img_scale=(1333, 800)
@@ -199,8 +199,8 @@ Users can get the channels of the new backbone by Replacing the `ResNet(depth=18
 
 # Use Detectron2 Model in MMDetection
 
-Users can use Detectron2Wrapper to run Detectron2's model in MMDetection. We provide examples of [Faster R-CNN](../../../configs/misc/d2_faster-rcnn_r50-caffe_fpn_ms-90k_coco.py),
-[Mask R-CNN](../../../configs/misc/d2_mask-rcnn_r50-caffe_fpn_ms-90k_coco.py), and [RetinaNet](../../../configs/misc/d2_retinanet_r50-caffe_fpn_ms-90k_coco.py) in MMDetection.
+Users can use Detectron2Wrapper to run Detectron2's model in MMDetection. We provide examples of [Faster R-CNN](../../../mmdet/.mim/configs/misc/d2_faster-rcnn_r50-caffe_fpn_ms-90k_coco.py),
+[Mask R-CNN](../../../mmdet/.mim/configs/misc/d2_mask-rcnn_r50-caffe_fpn_ms-90k_coco.py), and [RetinaNet](../../../mmdet/.mim/configs/misc/d2_retinanet_r50-caffe_fpn_ms-90k_coco.py) in MMDetection.
 
 The algorithm components in config file should be the same as those of in Detectron2. During setup, we will first initialize the default settings, which can be found in [Detectron2](https://github.com/facebookresearch/detectron2/blob/main/detectron2/config/defaults.py).
 Then, the settings in config file will overwrite the default settings and the model will be built with these settings.

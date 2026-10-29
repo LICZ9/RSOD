@@ -4,7 +4,7 @@
 
 In this section, we demonstrate how to prepare an environment with PyTorch.
 
-MMDetection works on Linux, Windows, and macOS. It requires Python 3.7+, CUDA 9.2+, and PyTorch 1.8+.
+MMDetection works on Linux, Windows, and macOS. It requires Python 3.9+, CUDA 9.2+, and PyTorch 1.8+.
 
 ```{note}
 If you are experienced with PyTorch and have already installed it, just skip this part and jump to the [next section](#installation). Otherwise, you can follow these steps for the preparation.
@@ -15,7 +15,7 @@ If you are experienced with PyTorch and have already installed it, just skip thi
 **Step 1.** Create a conda environment and activate it.
 
 ```shell
-conda create --name openmmlab python=3.8 -y
+conda create --name openmmlab python=3.9.24 -y
 conda activate openmmlab
 ```
 
@@ -85,7 +85,7 @@ The downloading will take several seconds or more, depending on your network env
 Case a: If you install MMDetection from source, just run the following command.
 
 ```shell
-python demo/image_demo.py demo/demo.jpg rtmdet_tiny_8xb32-300e_coco.py --weights rtmdet_tiny_8xb32-300e_coco_20220902_112414-78e30dcc.pth --device cpu
+python mmdet/.mim/demo/image_demo.py mmdet/.mim/demo/demo.jpg rtmdet_tiny_8xb32-300e_coco.py --weights rtmdet_tiny_8xb32-300e_coco_20220902_112414-78e30dcc.pth --device cpu
 ```
 
 You will see a new image `demo.jpg` on your `./outputs/vis` folder, where bounding boxes are plotted on cars, benches, etc.
@@ -98,7 +98,7 @@ from mmdet.apis import init_detector, inference_detector
 config_file = 'rtmdet_tiny_8xb32-300e_coco.py'
 checkpoint_file = 'rtmdet_tiny_8xb32-300e_coco_20220902_112414-78e30dcc.pth'
 model = init_detector(config_file, checkpoint_file, device='cpu')  # or device='cuda:0'
-inference_detector(model, 'demo/demo.jpg')
+inference_detector(model, 'mmdet/.mim/demo/demo.jpg')
 ```
 
 You will see a list of `DetDataSample`, and the predictions are in the `pred_instance`, indicating the detected bounding boxes, labels, and scores.
@@ -159,12 +159,12 @@ The downloading will take several seconds or more, depending on your network env
 Case a: If you install MMDetection from source, just run the following command.
 
 ```shell
-python demo/mot_demo.py demo/demo_mot.mp4 bytetrack_yolox_x_8xb4-amp-80e_crowdhuman-mot17halftrain_test-mot17halfval.py --checkpoint bytetrack_yolox_x_crowdhuman_mot17-private-half_20211218_205500-1985c9f0.pth --out mot.mp4
+python mmdet/.mim/demo/mot_demo.py mmdet/.mim/demo/demo_mot.mp4 bytetrack_yolox_x_8xb4-amp-80e_crowdhuman-mot17halftrain_test-mot17halfval.py --checkpoint bytetrack_yolox_x_crowdhuman_mot17-private-half_20211218_205500-1985c9f0.pth --out mot.mp4
 ```
 
 You will see a new video `mot.mp4` on your folder, where bounding boxes are plotted on person.
 
-Case b: If you install MMDetection with MIM, open your python interpreter and demo/mot_demo.py, then run it like Case a.
+Case b: If you install MMDetection with MIM, open your python interpreter and mmdet/.mim/demo/mot_demo.py, then run it like Case a.
 
 ### Customize Installation
 
@@ -267,7 +267,7 @@ Within Jupyter, the exclamation mark `!` is used to call external executables an
 
 #### Use MMDetection with Docker
 
-We provide a [Dockerfile](../../docker/Dockerfile) to build an image. Ensure that your [docker version](https://docs.docker.com/engine/install/) >=19.03.
+We provide a [Dockerfile](https://github.com/open-mmlab/mmdetection/blob/v3.2.0/docker/Dockerfile) to build an image. Ensure that your [docker version](https://docs.docker.com/engine/install/) >=19.03.
 
 ```shell
 # build an image with PyTorch 1.9, CUDA 11.1

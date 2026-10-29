@@ -73,8 +73,8 @@ Thank @YQisme, @nskostas, @max-unfinity, @evdcush, @Xiangxu-0103, @ZhaoCake, @Ra
 ### Highlights
 
 - Supports tracking algorithms including multi-object tracking (MOT) algorithms SORT, DeepSORT, StrongSORT, OCSORT, ByteTrack, QDTrack, and video instance segmentation (VIS) algorithm MaskTrackRCNN, Mask2Former-VIS.
-- Support [ViTDet](../../../projects/ViTDet)
-- Supports inference and evaluation of multimodal algorithms [GLIP](../../../configs/glip) and [XDecoder](../../../projects/XDecoder), and also supports datasets such as COCO semantic segmentation, COCO Caption, ADE20k general segmentation, and RefCOCO. GLIP fine-tuning will be supported in the future.
+- Support [ViTDet](https://github.com/open-mmlab/mmdetection/tree/v3.2.0/projects/ViTDet)
+- Supports inference and evaluation of multimodal algorithms [GLIP](../../../mmdet/.mim/configs/glip) and [XDecoder](https://github.com/open-mmlab/mmdetection/tree/v3.2.0/projects/XDecoder), and also supports datasets such as COCO semantic segmentation, COCO Caption, ADE20k general segmentation, and RefCOCO. GLIP fine-tuning will be supported in the future.
 - Provides a [gradio demo](https://github.com/open-mmlab/mmdetection/blob/dev-3.x/projects/gradio_demo/README.md) for image type tasks of MMDetection, making it easy for users to experience.
 
 ### New Features
@@ -112,8 +112,8 @@ Thanks @lovelykite, @minato-ellie, @freepoet, @wufan-tb, @yalibian, @keyakiluo, 
 
 ### Highlights
 
-- Support Semi-automatic annotation Base [Label-Studio](../../../projects/LabelStudio) (#10039)
-- Support [EfficientDet](../../../projects/EfficientDet) in projects (#9810)
+- Support Semi-automatic annotation Base [Label-Studio](https://github.com/open-mmlab/mmdetection/tree/v3.2.0/projects/LabelStudio) (#10039)
+- Support [EfficientDet](https://github.com/open-mmlab/mmdetection/tree/v3.2.0/projects/EfficientDet) in projects (#9810)
 
 ### New Features
 
@@ -158,11 +158,11 @@ Thanks @IRONICBo, @vansin, @RangeKing, @Ghlerrix, @okotaku, @JosonChan1998, @zgz
 
 ### Highlights
 
-- Support [Boxinst](../../../configs/boxinst), [Objects365 Dataset](../../../configs/objects365), and [Separated and Occluded COCO metric](../user_guides/useful_tools.md#COCO-Separated-&-Occluded-Mask-Metric)
-- Support [ConvNeXt-V2](../../../projects/ConvNeXt-V2), [DiffusionDet](../../../projects/DiffusionDet), and inference of [EfficientDet](../../../projects/EfficientDet) and [Detic](../../../projects/Detic) in `Projects`
-- Refactor [DETR](../../../configs/detr) series and support [Conditional-DETR](../../../configs/conditional_detr), [DAB-DETR](../../../configs/dab_detr), and [DINO](../../../configs/detr)
+- Support [Boxinst](../../../mmdet/.mim/configs/boxinst), [Objects365 Dataset](../../../mmdet/.mim/configs/objects365), and [Separated and Occluded COCO metric](../user_guides/useful_tools.md#COCO-Separated-&-Occluded-Mask-Metric)
+- Support [ConvNeXt-V2](https://github.com/open-mmlab/mmdetection/tree/v3.2.0/projects/ConvNeXt-V2), [DiffusionDet](https://github.com/open-mmlab/mmdetection/tree/v3.2.0/projects/DiffusionDet), and inference of [EfficientDet](https://github.com/open-mmlab/mmdetection/tree/v3.2.0/projects/EfficientDet) and [Detic](https://github.com/open-mmlab/mmdetection/tree/v3.2.0/projects/Detic) in `Projects`
+- Refactor [DETR](../../../mmdet/.mim/configs/detr) series and support [Conditional-DETR](../../../mmdet/.mim/configs/conditional_detr), [DAB-DETR](../../../mmdet/.mim/configs/dab_detr), and [DINO](../../../mmdet/.mim/configs/detr)
 - Support `DetInferencer` for inference, Test Time Augmentation, and automatically importing modules from registry
-- Support RTMDet-Ins ONNXRuntime and TensorRT [deployment](../../../configs/rtmdet/README.md#deployment-tutorial)
+- Support RTMDet-Ins ONNXRuntime and TensorRT [deployment](../../../mmdet/.mim/configs/rtmdet/README.md#deployment-tutorial)
 - Support [calculating FLOPs of detectors](../user_guides/useful_tools.md#Model-Complexity)
 
 ### New Features
@@ -304,13 +304,13 @@ Thanks @liuyanyi, @RangeKing, @lihua199710, @MambaWong, @sanbuphy, @Xiangxu-0103
 
 - Support [CondInst](https://arxiv.org/abs/2003.05664)
 - Add `projects/` folder, which will be a place for some experimental models/features.
-- Support [SparseInst](https://arxiv.org/abs/2203.12827) in [`projects`](./projects/SparseInst/README.md)
+- Support [SparseInst](https://arxiv.org/abs/2203.12827) in [`projects`](https://github.com/open-mmlab/mmdetection/blob/v3.2.0/projects/SparseInst/README.md)
 
 ### New Features
 
 - Support [CondInst](https://arxiv.org/abs/2003.05664) (#9223)
 - Add `projects/` folder, which will be a place for some experimental models/features (#9341)
-- Support [SparseInst](https://arxiv.org/abs/2203.12827) in [`projects`](./projects/SparseInst/README.md) (#9377)
+- Support [SparseInst](https://arxiv.org/abs/2203.12827) in [`projects`](https://github.com/open-mmlab/mmdetection/blob/v3.2.0/projects/SparseInst/README.md) (#9377)
 
 ### Bug Fixes
 
@@ -400,11 +400,11 @@ Thanks @wanghonglie, @Wwupup, @sanbuphy, @BIGWangYuDong, @liuyanyi, @cxiang26, @
 
 ### Highlights
 
-- Support [imagenet pre-training](configs/rtmdet/cspnext_imagenet_pretrain) for RTMDet's backbone
+- Support [imagenet pre-training](../../../mmdet/.mim/configs/rtmdet/classification) for RTMDet's backbone
 
 ### New Features
 
-- Support [imagenet pre-training](configs/rtmdet/cspnext_imagenet_pretrain) for RTMDet's backbone (#8887)
+- Support [imagenet pre-training](../../../mmdet/.mim/configs/rtmdet/classification) for RTMDet's backbone (#8887)
 - Add `CrowdHumanDataset` and Metric (#8430)
 - Add `FixShapeResize` to support resize of fixed shape (#8665)
 
@@ -451,7 +451,7 @@ Thanks @RangiLyu, @jbwang1997, @wanghonglie, @Chan-Sun, @RangeKing, @chhluo, @Ma
 
 ### Highlights
 
-- Release a high-precision, low-latency single-stage object detector [RTMDet](configs/rtmdet).
+- Release a high-precision, low-latency single-stage object detector [RTMDet](../../../mmdet/.mim/configs/rtmdet).
 
 ### Bug Fixes
 
@@ -488,7 +488,7 @@ We are excited to announce the release of MMDetection 3.0.0rc0. MMDet 3.0.0rc0 i
 
 2. **Unified interfaces**. As a part of the OpenMMLab 2.0 projects, MMDet 3.x unifies and refactors the interfaces and internal logic of training, testing, datasets, models, evaluation, and visualization. All the OpenMMLab 2.0 projects share the same design in those interfaces and logic to allow the emergence of multi-task/modality algorithms.
 
-3. **Faster speed**. We optimize the training and inference speed for common models and configurations, achieving a faster or similar speed than [Detection2](https://github.com/facebookresearch/detectron2/). Model details of benchmark will be updated in [this note](./benchmark.md#comparison-with-detectron2).
+3. **Faster speed**. We optimize the training and inference speed for common models and configurations, achieving a faster or similar speed than [Detection2](https://github.com/facebookresearch/detectron2/). Model details of benchmark will be updated in [this note](../model_zoo.md#comparison-with-detectron2).
 
 4. **General semi-supervised object detection**. Benefitting from the unified interfaces, we support a general semi-supervised learning framework that works with all the object detectors supported in MMDet 3.x. Please refer to [semi-supervised object detection](../user_guides/semi_det.md) for details.
 

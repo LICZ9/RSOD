@@ -10,7 +10,7 @@ To start with, we recommend [RTMDet](https://github.com/open-mmlab/mmdetection/t
 ## High-level APIs for inference - `Inferencer`
 
 In OpenMMLab, all the inference operations are unified into a new interface - Inferencer. Inferencer is designed to expose a neat and simple API to users, and shares very similar interface across different OpenMMLab libraries.
-A notebook demo can be found in [demo/inference_demo.ipynb](https://github.com/open-mmlab/mmdetection/blob/main/demo/inference_demo.ipynb).
+A notebook demo can be found in [mmdet/.mim/demo/inference_demo.ipynb](https://github.com/open-mmlab/mmdetection/blob/main/demo/inference_demo.ipynb).
 
 ### Basic Usage
 
@@ -23,7 +23,7 @@ from mmdet.apis import DetInferencer
 inferencer = DetInferencer('rtmdet_tiny_8xb32-300e_coco')
 
 # Perform inference
-inferencer('demo/demo.jpg', show=True)
+inferencer('mmdet/.mim/demo/demo.jpg', show=True)
 ```
 
 The resulting output will be displayed in a new window:.
@@ -104,14 +104,14 @@ Input can be either of these types:
 - str: Path/URL to the image.
 
   ```python
-  inferencer('demo/demo.jpg')
+  inferencer('mmdet/.mim/demo/demo.jpg')
   ```
 
 - array: Image in numpy array. It should be in BGR order.
 
   ```python
   import mmcv
-  array = mmcv.imread('demo/demo.jpg')
+  array = mmcv.imread('mmdet/.mim/demo/demo.jpg')
   inferencer(array)
   ```
 
@@ -154,14 +154,14 @@ By default, each `Inferencer` returns the prediction results in a dictionary for
   }
 ```
 
-If you wish to get the raw outputs from the model, you can set `return_datasamples` to `True` to get the original [DataSample](advanced_guides/structures.md), which will be stored in `predictions`.
+If you wish to get the raw outputs from the model, you can set `return_datasamples` to `True` to get the original [DataSample](../advanced_guides/structures.md), which will be stored in `predictions`.
 
 #### Dumping Results
 
 Apart from obtaining predictions from the return value, you can also export the predictions/visualizations to files by setting `out_dir` and `no_save_pred`/`no_save_vis` arguments.
 
 ```python
-inferencer('demo/demo.jpg', out_dir='outputs/', no_save_pred=False)
+inferencer('mmdet/.mim/demo/demo.jpg', out_dir='outputs/', no_save_pred=False)
 ```
 
 Results in the directory structure like:
@@ -188,7 +188,7 @@ Here are extensive lists of parameters that you can use.
 
 | Arguments       | Type          | Type    | Description                                                                                                                                                                                                                                                                                              |
 | --------------- | ------------- | ------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `model`         | str, optional | None    | Path to the config file or the model name defined in metafile. For example, it could be 'rtmdet-s' or 'rtmdet_s_8xb32-300e_coco' or 'configs/rtmdet/rtmdet_s_8xb32-300e_coco.py'. If the model is not specified, the user must provide the `weights` saved by MMEngine which contains the config string. |
+| `model`         | str, optional | None    | Path to the config file or the model name defined in metafile. For example, it could be 'rtmdet-s' or 'rtmdet_s_8xb32-300e_coco' or 'mmdet/.mim/configs/rtmdet/rtmdet_s_8xb32-300e_coco.py'. If the model is not specified, the user must provide the `weights` saved by MMEngine which contains the config string. |
 | `weights`       | str, optional | None    | Path to the checkpoint. If it is not specified and `model` is a model name of metafile, the weights will be loaded from metafile.                                                                                                                                                                        |
 | `device`        | str, optional | None    | Device used for inference, accepting all allowed strings by `torch.device`. E.g., 'cuda:0' or 'cpu'. If None, the available device will be automatically used.                                                                                                                                           |
 | `scope`         | str, optional | 'mmdet' | The scope of the model.                                                                                                                                                                                                                                                                                  |
@@ -226,7 +226,7 @@ Source codes are available [here](https://github.com/open-mmlab/mmdetection/blob
 This script performs inference on a single image.
 
 ```shell
-python demo/image_demo.py \
+python mmdet/.mim/demo/image_demo.py \
     ${IMAGE_FILE} \
     ${CONFIG_FILE} \
     [--weights ${WEIGHTS}] \
@@ -237,8 +237,8 @@ python demo/image_demo.py \
 Examples:
 
 ```shell
-python demo/image_demo.py demo/demo.jpg \
-    configs/rtmdet/rtmdet_l_8xb32-300e_coco.py \
+python mmdet/.mim/demo/image_demo.py mmdet/.mim/demo/demo.jpg \
+    mmdet/.mim/configs/rtmdet/rtmdet_l_8xb32-300e_coco.py \
     --weights checkpoints/rtmdet_l_8xb32-300e_coco_20220719_112030-5a0be7c4.pth \
     --device cpu
 ```
@@ -248,7 +248,7 @@ python demo/image_demo.py demo/demo.jpg \
 This is a live demo from a webcam.
 
 ```shell
-python demo/webcam_demo.py \
+python mmdet/.mim/demo/webcam_demo.py \
     ${CONFIG_FILE} \
     ${CHECKPOINT_FILE} \
     [--device ${GPU_ID}] \
@@ -259,8 +259,8 @@ python demo/webcam_demo.py \
 Examples:
 
 ```shell
-python demo/webcam_demo.py \
-    configs/rtmdet/rtmdet_l_8xb32-300e_coco.py \
+python mmdet/.mim/demo/webcam_demo.py \
+    mmdet/.mim/configs/rtmdet/rtmdet_l_8xb32-300e_coco.py \
     checkpoints/rtmdet_l_8xb32-300e_coco_20220719_112030-5a0be7c4.pth
 ```
 
@@ -269,7 +269,7 @@ python demo/webcam_demo.py \
 This script performs inference on a video.
 
 ```shell
-python demo/video_demo.py \
+python mmdet/.mim/demo/video_demo.py \
     ${VIDEO_FILE} \
     ${CONFIG_FILE} \
     ${CHECKPOINT_FILE} \
@@ -283,8 +283,8 @@ python demo/video_demo.py \
 Examples:
 
 ```shell
-python demo/video_demo.py demo/demo.mp4 \
-    configs/rtmdet/rtmdet_l_8xb32-300e_coco.py \
+python mmdet/.mim/demo/video_demo.py mmdet/.mim/demo/demo.mp4 \
+    mmdet/.mim/configs/rtmdet/rtmdet_l_8xb32-300e_coco.py \
     checkpoints/rtmdet_l_8xb32-300e_coco_20220719_112030-5a0be7c4.pth \
     --out result.mp4
 ```
@@ -294,7 +294,7 @@ python demo/video_demo.py demo/demo.mp4 \
 This script performs inference on a video with GPU acceleration.
 
 ```shell
-python demo/video_gpuaccel_demo.py \
+python mmdet/.mim/demo/video_gpuaccel_demo.py \
     ${VIDEO_FILE} \
     ${CONFIG_FILE} \
     ${CHECKPOINT_FILE} \
@@ -309,8 +309,8 @@ python demo/video_gpuaccel_demo.py \
 Examples:
 
 ```shell
-python demo/video_gpuaccel_demo.py demo/demo.mp4 \
-    configs/rtmdet/rtmdet_l_8xb32-300e_coco.py \
+python mmdet/.mim/demo/video_gpuaccel_demo.py mmdet/.mim/demo/demo.mp4 \
+    mmdet/.mim/configs/rtmdet/rtmdet_l_8xb32-300e_coco.py \
     checkpoints/rtmdet_l_8xb32-300e_coco_20220719_112030-5a0be7c4.pth \
     --nvdecode --out result.mp4
 ```
@@ -320,7 +320,7 @@ python demo/video_gpuaccel_demo.py demo/demo.mp4 \
 This is a script for slicing inference on large images.
 
 ```
-python demo/large_image_demo.py \
+python mmdet/.mim/demo/large_image_demo.py \
 	${IMG_PATH} \
 	${CONFIG_FILE} \
 	${CHECKPOINT_FILE} \
@@ -343,24 +343,24 @@ Examples:
 # inferecnce without tta
 wget -P checkpoint https://download.openmmlab.com/mmdetection/v2.0/faster_rcnn/faster_rcnn_r101_fpn_2x_coco/faster_rcnn_r101_fpn_2x_coco_bbox_mAP-0.398_20200504_210455-1d2dac9c.pth
 
-python demo/large_image_demo.py \
-    demo/large_image.jpg \
-    configs/faster_rcnn/faster-rcnn_r101_fpn_2x_coco.py \
+python mmdet/.mim/demo/large_image_demo.py \
+    mmdet/.mim/demo/large_image.jpg \
+    mmdet/.mim/configs/faster_rcnn/faster-rcnn_r101_fpn_2x_coco.py \
     checkpoint/faster_rcnn_r101_fpn_2x_coco_bbox_mAP-0.398_20200504_210455-1d2dac9c.pth
 
 # inference with tta
 wget -P checkpoint https://download.openmmlab.com/mmdetection/v2.0/retinanet/retinanet_r50_fpn_1x_coco/retinanet_r50_fpn_1x_coco_20200130-c2398f9e.pth
 
-python demo/large_image_demo.py \
-    demo/large_image.jpg \
-    configs/retinanet/retinanet_r50_fpn_1x_coco.py \
+python mmdet/.mim/demo/large_image_demo.py \
+    mmdet/.mim/demo/large_image.jpg \
+    mmdet/.mim/configs/retinanet/retinanet_r50_fpn_1x_coco.py \
     checkpoint/retinanet_r50_fpn_1x_coco_20200130-c2398f9e.pth --tta
 
 ```
 
 ## Multi-modal algorithm inference demo and evaluation
 
-As multimodal vision algorithms continue to evolve, MMDetection has also supported such algorithms. This section demonstrates how to use the demo and eval scripts corresponding to multimodal algorithms using the GLIP algorithm and model as the example. Moreover, MMDetection integrated a [gradio_demo project](../../../projects/gradio_demo/), which allows developers to quickly play with all image input tasks in MMDetection on their local devices. Check the [document](../../../projects/gradio_demo/README.md) for more details.
+As multimodal vision algorithms continue to evolve, MMDetection has also supported such algorithms. This section demonstrates how to use the demo and eval scripts corresponding to multimodal algorithms using the GLIP algorithm and model as the example. Moreover, MMDetection integrated a [gradio_demo project](../../../mmdet/.mim/demo), which allows developers to quickly play with all image input tasks in MMDetection on their local devices. Check the [document](https://github.com/open-mmlab/mmdetection/blob/v3.2.0/projects/gradio_demo/README.md) for more details.
 
 ### Preparation
 
@@ -383,10 +383,10 @@ wget https://download.openmmlab.com/mmdetection/v3.0/glip/glip_tiny_a_mmdet-b365
 
 ### Inference
 
-Once the model is successfully downloaded, you can use the `demo/image_demo.py` script to run the inference.
+Once the model is successfully downloaded, you can use the `mmdet/.mim/demo/image_demo.py` script to run the inference.
 
 ```shell
-python demo/image_demo.py demo/demo.jpg glip_tiny_a_mmdet-b3654169.pth --texts bench
+python mmdet/.mim/demo/image_demo.py mmdet/.mim/demo/demo.jpg glip_tiny_a_mmdet-b3654169.pth --texts bench
 ```
 
 Demo result will be similar to this:
@@ -398,7 +398,7 @@ Demo result will be similar to this:
 If users would like to detect multiple targets, please declare them in the format of `xx. xx` after the `--texts`.
 
 ```shell
-python demo/image_demo.py demo/demo.jpg glip_tiny_a_mmdet-b3654169.pth --texts 'bench. car'
+python mmdet/.mim/demo/image_demo.py mmdet/.mim/demo/demo.jpg glip_tiny_a_mmdet-b3654169.pth --texts 'bench. car'
 ```
 
 And the result will be like this one:
@@ -410,7 +410,7 @@ And the result will be like this one:
 You can also use a sentence as the input prompt for the `--texts` field, for example:
 
 ```shell
-python demo/image_demo.py demo/demo.jpg glip_tiny_a_mmdet-b3654169.pth --texts 'There are a lot of cars here.'
+python mmdet/.mim/demo/image_demo.py mmdet/.mim/demo/demo.jpg glip_tiny_a_mmdet-b3654169.pth --texts 'There are a lot of cars here.'
 ```
 
 The result will be similar to this:
@@ -433,8 +433,8 @@ Users can use the test script we provided to run evaluation as well. Here is a b
 
 ```shell
 # 1 gpu
-python tools/test.py configs/glip/glip_atss_swin-t_fpn_dyhead_pretrain_obj365.py glip_tiny_a_mmdet-b3654169.pth
+python tools/test.py mmdet/.mim/configs/glip/glip_atss_swin-t_a_fpn_dyhead_pretrain_obj365.py glip_tiny_a_mmdet-b3654169.pth
 
 # 8 GPU
-./tools/dist_test.sh configs/glip/glip_atss_swin-t_fpn_dyhead_pretrain_obj365.py glip_tiny_a_mmdet-b3654169.pth 8
+./tools/dist_test.sh mmdet/.mim/configs/glip/glip_atss_swin-t_a_fpn_dyhead_pretrain_obj365.py glip_tiny_a_mmdet-b3654169.pth 8
 ```

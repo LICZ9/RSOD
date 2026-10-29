@@ -132,15 +132,14 @@ def parse_requirements(fname='requirements.txt', with_version=True):
 
 
 def add_mim_extension():
-    """Add extra files that are required to support MIM into the package.
+    """Add missing MIM resources without replacing existing destinations.
 
-    These files will be added by creating a symlink to the originals if the
-    package is installed in `editable` mode (e.g. pip install -e .), or by
-    copying from the originals otherwise.
+    Editable installs link new entries on platforms supporting symlinks.
+    Existing files and links take precedence over the source tree.
     """
 
     # parse installment mode
-    if 'develop' in sys.argv:
+    if 'develop' in sys.argv or 'editable_wheel' in sys.argv:
         # installed by `pip install -e .`
         if platform.system() == 'Windows':
             # set `copy` mode here since symlink fails on Windows.
@@ -157,32 +156,57 @@ def add_mim_extension():
     filenames = [
         'tools', 'configs', 'demo', 'model-index.yml', 'dataset-index.yml'
     ]
-    repo_path = osp.dirname(__file__)
+    repo_path = osp.abspath(osp.dirname(__file__))
     mim_path = osp.join(repo_path, 'mmdet', '.mim')
+    if osp.islink(mim_path):
+        warnings.warn('Preserving the existing MIM resource symbolic link.')
+        return
     os.makedirs(mim_path, exist_ok=True)
 
-    for filename in filenames:
-        if osp.exists(filename):
-            src_path = osp.join(repo_path, filename)
-            tar_path = osp.join(mim_path, filename)
-
-            if osp.isfile(tar_path) or osp.islink(tar_path):
-                os.remove(tar_path)
-            elif osp.isdir(tar_path):
-                shutil.rmtree(tar_path)
-
-            if mode == 'symlink':
+    def add_missing(src_path, tar_path):
+        if (osp.basename(src_path) == '__pycache__'
+                or src_path.endswith(('.pyc', '.pyo'))):
+            return
+        if osp.islink(src_path):
+            warnings.warn(f'Skipping symbolic-link resource source: {src_path}')
+            return
+        if osp.lexists(tar_path):
+            if (osp.islink(tar_path)
+                    or not (osp.isdir(src_path) and osp.isdir(tar_path))):
+                return
+        elif mode == 'symlink':
+            try:
                 src_relpath = osp.relpath(src_path, osp.dirname(tar_path))
                 os.symlink(src_relpath, tar_path)
-            elif mode == 'copy':
-                if osp.isfile(src_path):
-                    shutil.copyfile(src_path, tar_path)
-                elif osp.isdir(src_path):
-                    shutil.copytree(src_path, tar_path)
-                else:
-                    warnings.warn(f'Cannot copy file {src_path}.')
-            else:
-                raise ValueError(f'Invalid mode {mode}')
+            except FileExistsError:
+                pass
+            return
+        elif osp.isdir(src_path):
+            try:
+                os.mkdir(tar_path)
+            except FileExistsError:
+                if osp.islink(tar_path) or not osp.isdir(tar_path):
+                    return
+        elif osp.isfile(src_path):
+            try:
+                with open(src_path, 'rb') as source:
+                    with open(tar_path, 'xb') as destination:
+                        shutil.copyfileobj(source, destination)
+            except FileExistsError:
+                return
+            shutil.copystat(src_path, tar_path)
+            return
+        else:
+            warnings.warn(f'Cannot copy file {src_path}.')
+            return
+
+        for name in sorted(os.listdir(src_path)):
+            add_missing(osp.join(src_path, name), osp.join(tar_path, name))
+
+    for filename in filenames:
+        src_path = osp.join(repo_path, filename)
+        if osp.exists(src_path):
+            add_missing(src_path, osp.join(mim_path, filename))
 
 
 if __name__ == '__main__':
@@ -199,13 +223,12 @@ if __name__ == '__main__':
         url='https://github.com/open-mmlab/mmdetection',
         packages=find_packages(exclude=('configs', 'tools', 'demo')),
         include_package_data=True,
+        python_requires='>=3.9',
         classifiers=[
             'Development Status :: 5 - Production/Stable',
             'License :: OSI Approved :: Apache Software License',
             'Operating System :: OS Independent',
             'Programming Language :: Python :: 3',
-            'Programming Language :: Python :: 3.7',
-            'Programming Language :: Python :: 3.8',
             'Programming Language :: Python :: 3.9',
         ],
         license='Apache License 2.0',

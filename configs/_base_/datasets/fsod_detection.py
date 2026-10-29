@@ -1,5 +1,13 @@
+_base_ = []
+
+import os
+
 dataset_type = 'CocoDataset'
-data_root = 'PATH_TO_ROOT_DATASET'
+data_root = os.path.expanduser(os.getenv('RSOD_DATA_ROOT', 'data/sonar'))
+
+metainfo = dict(classes=(
+    'Block', 'Circle Cage', 'Steel Frame', 'Concrete Column', 'Steel Plate',
+    'Pot', 'SquareCage', 'Tire', 'Underwater Robot', 'Diver'))
 
 backend_args = None
 
@@ -29,6 +37,7 @@ train_dataloader = dict(
     dataset=dict(
         type=dataset_type,
         data_root=data_root,
+        metainfo=metainfo,
         ann_file='annotations/instances_10train.json',
         data_prefix=dict(img='train/'),
         filter_cfg=dict(filter_empty_gt=False),
@@ -43,6 +52,7 @@ val_dataloader = dict(
     dataset=dict(
         type=dataset_type,
         data_root=data_root,
+        metainfo=metainfo,
         ann_file='annotations/instances_val.json',
         data_prefix=dict(img='val/'),
         test_mode=True,
@@ -66,13 +76,13 @@ test_dataloader = dict(
 
 val_evaluator = dict(
     type='CocoMetric',
-    ann_file=data_root + 'annotations/instances_val.json',
+    ann_file=os.path.join(data_root, 'annotations', 'instances_val.json'),
     metric='bbox',
     format_only=False,
     backend_args=backend_args)
 test_evaluator = dict(
     type='CocoMetric',
-    ann_file=data_root + 'annotations/instances_test.json',
+    ann_file=os.path.join(data_root, 'annotations', 'instances_test.json'),
     metric='bbox',
     format_only=False)
 

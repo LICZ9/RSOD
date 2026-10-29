@@ -24,7 +24,7 @@ class TestDetInferencer(TestCase):
         # init from metafile
         DetInferencer('rtmdet-t')
         # init from cfg
-        DetInferencer('configs/yolox/yolox_tiny_8xb8-300e_coco.py')
+        DetInferencer('mmdet/.mim/configs/yolox/yolox_tiny_8xb8-300e_coco.py')
 
     def assert_predictions_equal(self, preds1, preds2):
         for pred1, pred2 in zip(preds1, preds2):

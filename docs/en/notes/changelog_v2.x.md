@@ -5,13 +5,13 @@
 #### Highlights
 
 - Support dedicated `WandbLogger` hook
-- Support [ConvNeXt](configs/convnext), [DDOD](configs/ddod), [SOLOv2](configs/solov2)
-- Support [Mask2Former](configs/mask2former) for instance segmentation
-- Rename [config files of Mask2Former](configs/mask2former)
+- Support [ConvNeXt](../../../mmdet/.mim/configs/convnext), [DDOD](../../../mmdet/.mim/configs/ddod), [SOLOv2](../../../mmdet/.mim/configs/solov2)
+- Support [Mask2Former](../../../mmdet/.mim/configs/mask2former) for instance segmentation
+- Rename [config files of Mask2Former](../../../mmdet/.mim/configs/mask2former)
 
 #### Backwards incompatible changes
 
-- Rename [config files of Mask2Former](configs/mask2former) (#7571)
+- Rename [config files of Mask2Former](../../../mmdet/.mim/configs/mask2former) (#7571)
 
   <table align="center">
     <thead>
@@ -104,8 +104,8 @@
 
   - Fix wrong default type of `act_cfg` in `SwinTransformer` (#7794)
   - Fix text errors in the tutorials (#7959)
-  - Rewrite the [installation guide](docs/en/get_started.md) (#7897)
-  - [Useful hooks](docs/en/tutorials/useful_hooks.md) (#7810)
+  - Rewrite the [installation guide](../get_started.md) (#7897)
+  - [Useful hooks](https://github.com/open-mmlab/mmdetection/blob/v2.28.2/docs/en/tutorials/useful_hooks.md) (#7810)
   - Fix heading anchor in documentation  (#8006)
   - Replace `markdownlint` with `mdformat` for avoiding installing ruby (#8009)
 
@@ -125,7 +125,7 @@ Thanks @ZwwWayne, @DarthThomas, @solyaH, @LutingWang, @chenxinfeng4, @Czm369, @C
 
 #### New Features
 
-- Support [Simple Copy-Paste is a Strong Data Augmentation Method for Instance Segmentation](https://arxiv.org/abs/2012.07177), see [example configs](configs/simple_copy_paste/mask_rcnn_r50_fpn_syncbn-all_rpn-2conv_ssj_scp_32x2_270k_coco.py) (#7501)
+- Support [Simple Copy-Paste is a Strong Data Augmentation Method for Instance Segmentation](https://arxiv.org/abs/2012.07177), see [example configs](https://github.com/open-mmlab/mmdetection/blob/v2.28.2/configs/simple_copy_paste/mask_rcnn_r50_fpn_syncbn-all_rpn-2conv_ssj_scp_32x2_270k_coco.py) (#7501)
 
 - Support Class Aware Sampler, users can set
 
@@ -243,7 +243,7 @@ Thanks @ZwwWayne, @DarthThomas, @solyaH, @LutingWang, @chenxinfeng4, @Czm369, @C
   - proposals in Deformable DETR (#7690)
   - from-scratch install script in get_started.md (#7575)
 - Release pre-trained models of
-  - [Mask2Former](configs/mask2former) (#7595, #7709)
+  - [Mask2Former](../../../mmdet/.mim/configs/mask2former) (#7595, #7709)
   - RetinaNet with ResNet-18 and release models (#7387)
   - RetinaNet with EfficientNet backbone (#7646)
 
@@ -263,8 +263,8 @@ Thanks @jovialio, @zhangsanfeng2022, @HarryZJ, @jamiechoi1995, @nestiank, @Peter
 
 #### New Features
 
-- Support [Mask2Former](configs/mask2former)(#6938)(#7466)(#7471)
-- Support [EfficientNet](configs/efficientnet) (#7514)
+- Support [Mask2Former](../../../mmdet/.mim/configs/mask2former)(#6938)(#7466)(#7471)
+- Support [EfficientNet](../../../mmdet/.mim/configs/efficientnet) (#7514)
 - Support setting data root through environment variable `MMDET_DATASETS`, users don't have to modify the corresponding path in config files anymore. (#7386)
 - Support setting different seeds to different ranks (#7432)
 - Update the `dist_train.sh` so that the script can be used to support launching multi-node training on machines without slurm (#7415)
@@ -318,11 +318,11 @@ Thanks @ZwwWayne, @haofanwang, @shinya7y, @chhluo, @yangrisheng, @triple-Mu, @jb
 
 #### New Features
 
-- Support [MaskFormer](configs/maskformer) (#7212)
-- Support [DyHead](configs/dyhead) (#6823)
-- Support [ResNet Strikes Back](configs/resnet_strikes_back) (#7001)
-- Support [OpenImages Dataset](configs/openimages) (#6331)
-- Support [TIMM backbone](configs/timm_example) (#7020)
+- Support [MaskFormer](../../../mmdet/.mim/configs/maskformer) (#7212)
+- Support [DyHead](../../../mmdet/.mim/configs/dyhead) (#6823)
+- Support [ResNet Strikes Back](../../../mmdet/.mim/configs/resnet_strikes_back) (#7001)
+- Support [OpenImages Dataset](../../../mmdet/.mim/configs/openimages) (#6331)
+- Support [TIMM backbone](../../../mmdet/.mim/configs/timm_example) (#7020)
 - Support visualization for Panoptic Segmentation (#7041)
 
 #### Breaking Changes
@@ -388,7 +388,7 @@ Thanks @del-zhenwu, @zimoqingfeng, @srishilesh, @imyhxy, @jenhaoyang, @jliu-ac, 
 
 #### New Features
 
-- Support [TOOD](configs/tood/README.md): Task-aligned One-stage Object Detection (ICCV 2021 Oral) (#6746)
+- Support [TOOD](../../../mmdet/.mim/configs/tood/README.md): Task-aligned One-stage Object Detection (ICCV 2021 Oral) (#6746)
 - Support resuming from the latest checkpoint automatically (#6727)
 
 #### Bug Fixes
@@ -415,7 +415,7 @@ Thanks @ZwwWayne, @Czm369, @jshilong, @RangiLyu, @BIGWangYuDong, @hhaAndroid, @j
 
 #### New Features
 
-- Release [YOLOX](configs/yolox/README.md) COCO pretrained models (#6698)
+- Release [YOLOX](../../../mmdet/.mim/configs/yolox/README.md) COCO pretrained models (#6698)
 
 #### Bug Fixes
 
@@ -507,7 +507,7 @@ Thanks @FloydHsiu, @RangiLyu, @ZwwWayne, @AndreaPi, @st9007a, @hachreak, @BIGWan
 
 #### Documents
 
-- Chinese version of [Corruption Benchmarking](robustness_benchmarking.md) (#6375)
+- Chinese version of [Corruption Benchmarking](../user_guides/robustness_benchmarking.md) (#6375)
 - Fix config path in docs (#6396)
 - Update GRoIE readme (#6401)
 
@@ -732,7 +732,7 @@ Thanks @HAOCHENYE, @xiaohu2015, @HsLOL, @zhiqwang, @Adamdad, @shinya7y, @Johnson
 - Fix unit test error of pretrained configs (#5561)
 - Fix typo error in anchor_head.py (#5555)
 - Fix bug when using dataset wrappers (#5552)
-- Fix a typo error in demo/MMDet_Tutorial.ipynb (#5511)
+- Fix a typo error in mmdet/.mim/demo/MMDet_Tutorial.ipynb (#5511)
 - Fixing crash in `get_root_logger` when `cfg.log_level` is not None (#5521)
 - Fix docker version (#5502)
 - Fix optimizer parameter error when using `IterBasedRunner` (#5490)
@@ -1287,7 +1287,7 @@ __Bug Fixes__
 - Fix pretrain bug in NAS FCOS (#3145)
 - Fix `num_classes` in SSD (#3142)
 - Fix FCOS warmup (#3119)
-- Fix `rstrip` in `tools/publish_model.py`
+- Fix `rstrip` in `tools/model_converters/publish_model.py`
 - Fix `flip_ratio` default value in RandomFLip pipeline (#3106)
 - Fix cityscapes eval with ms_rcnn (#3112)
 - Fix RPN softmax (#3056)
@@ -1387,7 +1387,7 @@ __Improvements__
 
 In this release, we made lots of major refactoring and modifications.
 
-1. __Faster speed__. We optimize the training and inference speed for common models, achieving up to 30% speedup for training and 25% for inference. Please refer to [model zoo](model_zoo.md#comparison-with-detectron2) for details.
+1. __Faster speed__. We optimize the training and inference speed for common models, achieving up to 30% speedup for training and 25% for inference. Please refer to [model zoo](../model_zoo.md#comparison-with-detectron2) for details.
 
 2. __Higher performance__. We change some default hyperparameters with no additional cost, which leads to a gain of performance for most models. Please refer to [compatibility](compatibility.md#training-hyperparameters) for details.
 

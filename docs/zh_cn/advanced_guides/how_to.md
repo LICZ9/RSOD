@@ -34,7 +34,7 @@ model = dict(
 
 ### 通过 MMPretrain 使用 TIMM 中实现的骨干网络
 
-由于 MMPretrain 提供了 Py**T**orch **Im**age **M**odels (`timm`) 骨干网络的封装，用户也可以通过 MMPretrain 直接使用 `timm` 中的骨干网络。假设想将 [`EfficientNet-B1`](../../../configs/timm_example/retinanet_timm-efficientnet-b1_fpn_1x_coco.py) 作为 `RetinaNet` 的骨干网络，则配置文件如下。
+由于 MMPretrain 提供了 Py**T**orch **Im**age **M**odels (`timm`) 骨干网络的封装，用户也可以通过 MMPretrain 直接使用 `timm` 中的骨干网络。假设想将 [`EfficientNet-B1`](../../../mmdet/.mim/configs/timm_example/retinanet_timm-efficientnet-b1_fpn_1x_coco.py) 作为 `RetinaNet` 的骨干网络，则配置文件如下。
 
 ```python
 # https://github.com/open-mmlab/mmdetection/blob/main/configs/timm_example/retinanet_timm_efficientnet_b1_fpn_1x_coco.py
@@ -69,7 +69,7 @@ optimizer = dict(type='SGD', lr=0.01, momentum=0.9, weight_decay=0.0001)
 如果你想在训练中使用 `Mosaic`，那么请确保你同时使用 `MultiImageMixDataset`。以 `Faster R-CNN` 算法为例，你可以通过如下做法实现：
 
 ```python
-# 直接打开 configs/faster_rcnn/faster-rcnn_r50_fpn_1x_coco.py ,增添如下字段
+# 直接打开 mmdet/.mim/configs/faster_rcnn/faster-rcnn_r50_fpn_1x_coco.py ,增添如下字段
 data_root = 'data/coco/'
 dataset_type = 'CocoDataset'
 img_scale=(1333, 800)
@@ -199,8 +199,8 @@ for level_out in level_outputs:
 # MMDetection 中训练 Detectron2 的模型
 
 用户可以使用 `Detectron2Wrapper` 从而在 MMDetection 中使用 Detectron2 的模型。
-我们提供了 [Faster R-CNN](../../../configs/misc/d2_faster-rcnn_r50-caffe_fpn_ms-90k_coco.py),
-[Mask R-CNN](../../../configs/misc/d2_mask-rcnn_r50-caffe_fpn_ms-90k_coco.py) 和 [RetinaNet](../../../configs/misc/d2_retinanet_r50-caffe_fpn_ms-90k_coco.py) 的示例来在 MMDetection 中训练/测试 Detectron2 的模型。
+我们提供了 [Faster R-CNN](../../../mmdet/.mim/configs/misc/d2_faster-rcnn_r50-caffe_fpn_ms-90k_coco.py),
+[Mask R-CNN](../../../mmdet/.mim/configs/misc/d2_mask-rcnn_r50-caffe_fpn_ms-90k_coco.py) 和 [RetinaNet](../../../mmdet/.mim/configs/misc/d2_retinanet_r50-caffe_fpn_ms-90k_coco.py) 的示例来在 MMDetection 中训练/测试 Detectron2 的模型。
 
 使用过程中需要注意配置文件中算法组件要和 Detectron2 中的相同。模型初始化时，我们首先初始化 [Detectron2](https://github.com/facebookresearch/detectron2/blob/main/detectron2/config/defaults.py) 的默认设置，然后配置文件中的设置将覆盖默认设置，模型将基于更新过的设置来建立。
 输入数据首先转换成 Detectron2 的类型并输入进 Detectron2 的模型中。在推理阶段，Detectron2 的模型结果将会转换回 MMDetection 的类型。

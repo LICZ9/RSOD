@@ -147,7 +147,7 @@ GPUS=8 tools/slurm_test.sh \
 ```shell
 # 单 gpu 测试
 CUDA_VISIBLE_DEVICES=0 python tools/test.py \
-    configs/maskformer/maskformer_r50_mstrain_16x1_75e_coco.py \
+    mmdet/.mim/configs/maskformer/maskformer_r50_ms-16xb1-75e_coco.py \
     checkpoints/maskformer_r50_mstrain_16x1_75e_coco_20220221_141956-bc2699cb.pth \
     --cfg-options \
     test_dataloader.dataset.ann_file=annotations/panoptic_image_info_test-dev2017.json \

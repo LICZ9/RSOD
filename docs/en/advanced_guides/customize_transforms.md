@@ -43,7 +43,7 @@
 
 3. Visualize the output of your transforms pipeline
 
-   To visualize the output of your transforms pipeline, `tools/misc/browse_dataset.py`
+   To visualize the output of your transforms pipeline, `tools/analysis_tools/browse_dataset.py`
    can help the user to browse a detection dataset (both images and bounding box annotations)
    visually, or save the image to a designated directory. More details can refer to
    [visualization documentation](../user_guides/visualization.md)

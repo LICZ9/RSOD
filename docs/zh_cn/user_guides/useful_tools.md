@@ -83,7 +83,7 @@ python tools/analysis_tools/analyze_results.py \
 
 ```shell
 python tools/analysis_tools/analyze_results.py \
-       configs/faster_rcnn/faster-rcnn_r50_fpn_1x_coco.py \
+       mmdet/.mim/configs/faster_rcnn/faster-rcnn_r50_fpn_1x_coco.py \
        result.pkl \
        results \
        --show
@@ -93,7 +93,7 @@ python tools/analysis_tools/analyze_results.py \
 
 ```shell
 python tools/analysis_tools/analyze_results.py \
-       configs/faster_rcnn/faster-rcnn_r50_fpn_1x_coco.py \
+       mmdet/.mim/configs/faster_rcnn/faster-rcnn_r50_fpn_1x_coco.py \
        result.pkl \
        results \
        --topk 50
@@ -103,7 +103,7 @@ python tools/analysis_tools/analyze_results.py \
 
 ```shell
 python tools/analysis_tools/analyze_results.py \
-       configs/faster_rcnn/faster-rcnn_r50_fpn_1x_coco.py \
+       mmdet/.mim/configs/faster_rcnn/faster-rcnn_r50_fpn_1x_coco.py \
        result.pkl \
        results \
        --show-score-thr 0.3
@@ -213,21 +213,21 @@ python tools/analysis_tools/coco_error_analysis.py ${RESULT} ${OUT_DIR} [-h] [--
 
 样例:
 
-假设你已经把 [Mask R-CNN checkpoint file](https://download.openmmlab.com/mmdetection/v2.0/mask_rcnn/mask_rcnn_r50_fpn_1x_coco/mask_rcnn_r50_fpn_1x_coco_20200205-d4b0c5d6.pth) 放置在文件夹 'checkpoint' 中（其他模型请在 [model zoo](./model_zoo.md) 中获取）。
+假设你已经把 [Mask R-CNN checkpoint file](https://download.openmmlab.com/mmdetection/v2.0/mask_rcnn/mask_rcnn_r50_fpn_1x_coco/mask_rcnn_r50_fpn_1x_coco_20200205-d4b0c5d6.pth) 放置在文件夹 'checkpoint' 中（其他模型请在 [model zoo](../model_zoo.md) 中获取）。
 
 为了保存 bbox 结果信息，我们需要用下列方式修改 `test_evaluator` :
 
-1. 查找当前 config 文件相对应的  'configs/base/datasets' 数据集信息。
+1. 查找当前 config 文件相对应的  'mmdet/.mim/configs/_base_/datasets' 数据集信息。
 2. 用当前数据集 config 中的 test_evaluator 以及 test_dataloader 替换原始文件的 test_evaluator 以及 test_dataloader。
 3. 使用以下命令得到 bbox 或 segmentation 的 json 格式文件。
 
 ```shell
 python tools/test.py \
-       configs/mask_rcnn/mask-rcnn_r50_fpn_1x_coco.py \
+       mmdet/.mim/configs/mask_rcnn/mask-rcnn_r50_fpn_1x_coco.py \
        checkpoint/mask_rcnn_r50_fpn_1x_coco_20200205-d4b0c5d6.pth \
 ```
 
-1. 得到每一类的 COCO bbox 误差结果，并保存分析结果图像至指定目录。（在 [config](../../../configs/_base_/datasets/coco_instance.py) 中默认目录是 './work_dirs/coco_instance/test')
+1. 得到每一类的 COCO bbox 误差结果，并保存分析结果图像至指定目录。（在 [config](../../../mmdet/.mim/configs/_base_/datasets/coco_instance.py) 中默认目录是 './work_dirs/coco_instance/test')
 
 ```shell
 python tools/analysis_tools/coco_error_analysis.py \
@@ -336,8 +336,8 @@ python tools/deployment/test_torchserver.py ${IMAGE_FILE} ${CONFIG_FILE} ${CHECK
 
 ```shell
 python tools/deployment/test_torchserver.py \
-demo/demo.jpg \
-configs/yolo/yolov3_d53_8xb8-320-273e_coco.py \
+mmdet/.mim/demo/demo.jpg \
+mmdet/.mim/configs/yolo/yolov3_d53_8xb8-320-273e_coco.py \
 checkpoint/yolov3_d53_320_273e_coco-421362b6.pth \
 yolov3 \
 --work-dir ./work-dir
@@ -427,7 +427,7 @@ python tools/model_converters/publish_model.py work_dirs/faster_rcnn/latest.pth 
 
 ## 数据集转换
 
-`tools/data_converters/` 提供了将 Cityscapes 数据集与 Pascal VOC 数据集转换至 COCO 数据集格式的工具
+`tools/dataset_converters/` 提供了将 Cityscapes 数据集与 Pascal VOC 数据集转换至 COCO 数据集格式的工具
 
 ```shell
 python tools/dataset_converters/cityscapes.py ${CITYSCAPES_PATH} [-h] [--img-dir ${IMG_DIR}] [--gt-dir ${GT_DIR}] [-o ${OUT_DIR}] [--nproc ${NPROC}]
@@ -475,7 +475,7 @@ python -m torch.distributed.launch --nproc_per_node=1 --master_port=${PORT} tool
 
 ```shell
 python -m torch.distributed.launch --nproc_per_node=1 --master_port=29500 tools/analysis_tools/benchmark.py \
-       configs/faster_rcnn/faster-rcnn_r50_fpn_1x_coco.py \
+       mmdet/.mim/configs/faster_rcnn/faster-rcnn_r50_fpn_1x_coco.py \
        checkpoints/faster_rcnn_r50_fpn_1x_coco_20200130-047c8118.pth \
        --launcher pytorch
 ```
@@ -521,7 +521,7 @@ python tools/analysis_tools/optimize_anchors.py ${CONFIG} --algorithm differenti
 样例：
 
 ```shell
-python tools/analysis_tools/optimize_anchors.py configs/yolo/yolov3_d53_8xb8-320-273e_coco.py --algorithm differential_evolution --input-shape 608 608 --device cuda --output-dir work_dirs
+python tools/analysis_tools/optimize_anchors.py mmdet/.mim/configs/yolo/yolov3_d53_8xb8-320-273e_coco.py --algorithm differential_evolution --input-shape 608 608 --device cuda --output-dir work_dirs
 ```
 
 你可能会看到如下结果：

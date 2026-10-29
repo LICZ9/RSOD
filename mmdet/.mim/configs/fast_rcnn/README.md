@@ -54,7 +54,7 @@ The `pred_instance` is an `InstanceData` containing the sorted boxes and scores 
 
   ```bash
   ./tools/dist_test.sh \
-      configs/rpn_r50_fpn_1x_coco.py \
+      mmdet/.mim/configs/rpn/rpn_r50_fpn_1x_coco.py \
       checkpoints/rpn_r50_fpn_1x_coco_20200218-5525fa2e.pth \
       8
   ```

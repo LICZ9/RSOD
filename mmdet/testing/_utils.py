@@ -25,7 +25,9 @@ def _get_config_directory():
         repo_dpath = dirname(dirname(mmdet.__file__))
     config_dpath = join(repo_dpath, 'configs')
     if not exists(config_dpath):
-        raise Exception('Cannot find config path')
+        config_dpath = join(dirname(dirname(__file__)), '.mim', 'configs')
+    if not exists(config_dpath):
+        raise FileNotFoundError('Cannot find config directory')
     return config_dpath
 
 
@@ -33,6 +35,8 @@ def _get_config_module(fname):
     """Load a configuration as a python module."""
     config_dpath = _get_config_directory()
     config_fpath = join(config_dpath, fname)
+    if not exists(config_fpath):
+        config_fpath = join(dirname(dirname(__file__)), '.mim', 'configs', fname)
     config_mod = Config.fromfile(config_fpath)
     return config_mod
 

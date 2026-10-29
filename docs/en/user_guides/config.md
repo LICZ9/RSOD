@@ -380,7 +380,7 @@ resume = False  # Whether to resume from the checkpoint defined in `load_from`. 
 
 MMEngine's Runner also provides an iter-based training loop except for epoch-based.
 To use iter-based training, users should modify the `train_cfg`, `param_scheduler`, `train_dataloader`, `default_hooks`, and `log_processor`.
-Here is an example of changing an epoch-based RetinaNet config to iter-based: `configs/retinanet/retinanet_r50_fpn_90k_coco.py`
+Here is an example of changing an epoch-based RetinaNet config to iter-based: `mmdet/.mim/configs/retinanet/retinanet_r50_fpn_90k_coco.py`
 
 ```python
 # Iter-based training config

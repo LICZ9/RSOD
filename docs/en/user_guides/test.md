@@ -59,7 +59,7 @@ Assuming that you have already downloaded the checkpoints to the directory `chec
 
    ```shell
    python tools/test.py \
-       configs/rtmdet/rtmdet_l_8xb32-300e_coco.py \
+       mmdet/.mim/configs/rtmdet/rtmdet_l_8xb32-300e_coco.py \
        checkpoints/rtmdet_l_8xb32-300e_coco_20220719_112030-5a0be7c4.pth \
        --show
    ```
@@ -69,37 +69,37 @@ Assuming that you have already downloaded the checkpoints to the directory `chec
 
    ```shell
    python tools/test.py \
-       configs/rtmdet/rtmdet_l_8xb32-300e_coco.py \
+       mmdet/.mim/configs/rtmdet/rtmdet_l_8xb32-300e_coco.py \
        checkpoints/rtmdet_l_8xb32-300e_coco_20220719_112030-5a0be7c4.pth \
        --show-dir faster_rcnn_r50_fpn_1x_results
    ```
 
 3. Test Faster R-CNN on PASCAL VOC (without saving the test results).
-   Config and checkpoint files are available [here](../../../configs/pascal_voc).
+   Config and checkpoint files are available [here](../../../mmdet/.mim/configs/pascal_voc).
 
    ```shell
    python tools/test.py \
-       configs/pascal_voc/faster-rcnn_r50_fpn_1x_voc0712.py \
+       mmdet/.mim/configs/pascal_voc/faster-rcnn_r50_fpn_1x_voc0712.py \
        checkpoints/faster_rcnn_r50_fpn_1x_voc0712_20200624-c9895d40.pth
    ```
 
 4. Test Mask R-CNN with 8 GPUs, and evaluate.
-   Config and checkpoint files are available [here](../../../configs/mask_rcnn).
+   Config and checkpoint files are available [here](../../../mmdet/.mim/configs/mask_rcnn).
 
    ```shell
    ./tools/dist_test.sh \
-       configs/mask-rcnn_r50_fpn_1x_coco.py \
+       mmdet/.mim/configs/mask_rcnn/mask-rcnn_r50_fpn_1x_coco.py \
        checkpoints/mask_rcnn_r50_fpn_1x_coco_20200205-d4b0c5d6.pth \
        8 \
        --out results.pkl
    ```
 
 5. Test Mask R-CNN with 8 GPUs, and evaluate the metric **class-wise**.
-   Config and checkpoint files are available [here](../../../configs/mask_rcnn).
+   Config and checkpoint files are available [here](../../../mmdet/.mim/configs/mask_rcnn).
 
    ```shell
    ./tools/dist_test.sh \
-       configs/mask_rcnn/mask-rcnn_r50_fpn_1x_coco.py \
+       mmdet/.mim/configs/mask_rcnn/mask-rcnn_r50_fpn_1x_coco.py \
        checkpoints/mask_rcnn_r50_fpn_1x_coco_20200205-d4b0c5d6.pth \
        8 \
        --out results.pkl \
@@ -107,13 +107,13 @@ Assuming that you have already downloaded the checkpoints to the directory `chec
    ```
 
 6. Test Mask R-CNN on COCO test-dev with 8 GPUs, and generate JSON files for submitting to the official evaluation server.
-   Config and checkpoint files are available [here](../../../configs/mask_rcnn).
+   Config and checkpoint files are available [here](../../../mmdet/.mim/configs/mask_rcnn).
 
-   Replace the original test_evaluator and test_dataloader with test_evaluator and test_dataloader in the comment in [config](../../../configs/_base_/datasets/coco_instance.py) and run:
+   Replace the original test_evaluator and test_dataloader with test_evaluator and test_dataloader in the comment in [config](../../../mmdet/.mim/configs/_base_/datasets/coco_instance.py) and run:
 
    ```shell
    ./tools/dist_test.sh \
-       configs/mask_rcnn/mask-rcnn_r50_fpn_1x_coco.py \
+       mmdet/.mim/configs/mask_rcnn/mask-rcnn_r50_fpn_1x_coco.py \
        checkpoints/mask_rcnn_r50_fpn_1x_coco_20200205-d4b0c5d6.pth \
        8
    ```
@@ -121,13 +121,13 @@ Assuming that you have already downloaded the checkpoints to the directory `chec
    This command generates two JSON files `./work_dirs/coco_instance/test.bbox.json` and `./work_dirs/coco_instance/test.segm.json`.
 
 7. Test Mask R-CNN on Cityscapes test with 8 GPUs, and generate txt and png files for submitting to the official evaluation server.
-   Config and checkpoint files are available [here](../../../configs/cityscapes).
+   Config and checkpoint files are available [here](../../../mmdet/.mim/configs/cityscapes).
 
-   Replace the original test_evaluator and test_dataloader with test_evaluator and test_dataloader in the comment in [config](../../../configs/_base_/datasets/cityscapes_instance.py) and run:
+   Replace the original test_evaluator and test_dataloader with test_evaluator and test_dataloader in the comment in [config](../../../mmdet/.mim/configs/_base_/datasets/cityscapes_instance.py) and run:
 
    ```shell
    ./tools/dist_test.sh \
-       configs/cityscapes/mask-rcnn_r50_fpn_1x_cityscapes.py \
+       mmdet/.mim/configs/cityscapes/mask-rcnn_r50_fpn_1x_cityscapes.py \
        checkpoints/mask_rcnn_r50_fpn_1x_cityscapes_20200227-afe51d5a.pth \
        8
    ```
@@ -153,7 +153,7 @@ arguments:
 - `OUT`: The output annotation json file name. The save dir is in the same directory as `IMG_PATH`.
 - `exclude-extensions`: The suffix of images to be excluded, such as 'png' and 'bmp'.
 
-After the conversion is complete, you need to replace the original test_evaluator and test_dataloader with test_evaluator and test_dataloader in the comment in [config](../../../configs/_base_/datasets/coco_detection.py)(find which dataset in 'configs/_base_/datasets' the current config corresponds to) and run:
+After the conversion is complete, you need to replace the original test_evaluator and test_dataloader with test_evaluator and test_dataloader in the comment in [config](../../../mmdet/.mim/configs/_base_/datasets/coco_detection.py)(find which dataset in 'configs/_base_/datasets' the current config corresponds to) and run:
 
 ```shell
 # Single-gpu testing
@@ -182,7 +182,7 @@ Assuming that the checkpoints in the [model zoo](https://mmdetection.readthedocs
 
 ```sh
 ./tools/dist_test.sh \
-    configs/mask_rcnn/mask-rcnn_r50_fpn_1x_coco.py \
+    mmdet/.mim/configs/mask_rcnn/mask-rcnn_r50_fpn_1x_coco.py \
     checkpoints/mask_rcnn_r50_fpn_1x_coco_20200205-d4b0c5d6.pth \
     8
 ```
@@ -295,9 +295,9 @@ The above data augmentation pipeline will first perform 3 multi-scaling transfor
 
 Here are more TTA use cases for your reference:
 
-- [RetinaNet](../../../configs/retinanet/retinanet_tta.py)
-- [CenterNet](../../../configs/centernet/centernet_tta.py)
-- [YOLOX](../../../configs/rtmdet/rtmdet_tta.py)
-- [RTMDet](../../../configs/yolox/yolox_tta.py)
+- [RetinaNet](../../../mmdet/.mim/configs/retinanet/retinanet_tta.py)
+- [CenterNet](../../../mmdet/.mim/configs/centernet/centernet_tta.py)
+- [YOLOX](../../../mmdet/.mim/configs/rtmdet/rtmdet_tta.py)
+- [RTMDet](../../../mmdet/.mim/configs/yolox/yolox_tta.py)
 
 For more advanced usage and data flow of TTA, please refer to [MMEngine](https://mmengine.readthedocs.io/en/latest/advanced_tutorials/test_time_augmentation.html#data-flow). We will support instance segmentation TTA latter.

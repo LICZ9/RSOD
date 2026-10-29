@@ -1,6 +1,6 @@
 # Copyright (c) OpenMMLab. All rights reserved.
 import copy
-from typing import Dict, Optional, Tuple
+from typing import Dict, Optional
 import torch.nn as nn
 import torch
 from torch import Tensor
@@ -8,21 +8,19 @@ from torch import Tensor
 from mmdet.models.utils import (filter_gt_instances, rename_loss_dict,
                                      reweight_loss_dict)
 from mmdet.registry import MODELS
-from mmdet.visualization import DetLocalVisualizer
 from mmdet.structures import DetDataSample, SampleList
-from mmdet.utils import ConfigType, InstanceList, OptConfigType, OptMultiConfig
+from mmdet.utils import ConfigType, OptConfigType, OptMultiConfig
 from mmdet.models.detectors import SemiBaseDetector
 from mmdet.structures.bbox import bbox_project,bbox_overlaps
 from torch.nn import functional as F
 import numpy as np
 import math
-import os.path as osp
 
 
 
 @MODELS.register_module()
 class RSOD(SemiBaseDetector):
-    """Base class for semi-supervised detectors."""
+    """Semi-supervised detector with reliability-weighted pseudo labels."""
 
     def __init__(self,
                  detector: ConfigType,
@@ -36,260 +34,336 @@ class RSOD(SemiBaseDetector):
             semi_test_cfg=semi_test_cfg,
             data_preprocessor=data_preprocessor,
             init_cfg=init_cfg)
+        self._get_cache_size()
         self.cache_inputs = []
         self.cache_data_samples = []
         self.reliability_calculator = EnhancedReliabilityCalculator(
-            temp=semi_train_cfg.get('temp', 0.2),
+            temp=semi_train_cfg.get('temp', 0.6),
             min_scale=semi_train_cfg.get('min_scale', 0.8),
             max_scale=semi_train_cfg.get('max_scale', 1.2)
         )
-    def merge_reliable_instances(self, batch_inputs, batch_data_samples, reliability_scores, threshold=0.3):
-        for idx in range(len(batch_data_samples)):
-            assert len(batch_data_samples[idx].gt_instances) == len(reliability_scores[idx]), \
-                f"第{idx}组 gt_instances 数量={len(batch_data_samples[idx].gt_instances)}, reliability_scores 数量={len(reliability_scores[idx])}"
+    def merge_reliable_instances(self,
+                                 batch_inputs,
+                                 batch_data_samples,
+                                 reliability_scores,
+                                 threshold=0.5):
+        if (len(batch_inputs) != len(batch_data_samples)
+                or len(reliability_scores) != len(batch_data_samples)):
+            raise ValueError('Inputs, samples and reliability must match')
+        for sample, scores in zip(batch_data_samples, reliability_scores):
+            if scores.ndim != 1 or len(sample.gt_instances) != len(scores):
+                raise ValueError(
+                    'Each instance must have one reliability score')
         if len(batch_data_samples) <= 1:
             return batch_inputs, batch_data_samples, reliability_scores
 
         target_img = batch_inputs[0].clone()
         target_sample = batch_data_samples[0]
-
+        target_h, target_w = target_sample.img_shape[:2]
+        if not (0 < target_h <= target_img.shape[-2]
+                and 0 < target_w <= target_img.shape[-1]):
+            raise ValueError(
+                'Target img_shape must fit inside its input tensor')
         merged_instances = target_sample.gt_instances.clone()
         current_boxes = merged_instances.bboxes
-
         merged_reliability_scores = [reliability_scores[0].clone()]
+        overlap_threshold = self.semi_train_cfg.get('non_overlap_threshold',
+                                                    0.2)
+        score_threshold = self.semi_train_cfg.get('cls_pseudo_thr', 0.7)
+        occlusion_threshold = self.semi_train_cfg.get(
+            'paste_occlusion_threshold', 0.3)
+        if not 0 <= occlusion_threshold <= 1:
+            raise ValueError('Paste occlusion threshold must be in [0, 1]')
+
+        area_dtype = (torch.float64 if current_boxes.dtype == torch.float64
+                      else torch.float32)
+        visible_regions = current_boxes.to(dtype=area_dtype).clone()
+        visible_regions[:, 0::2].clamp_(0, target_w)
+        visible_regions[:, 1::2].clamp_(0, target_h)
+        box_areas = (visible_regions[:, 2:] -
+                     visible_regions[:, :2]).clamp_min(0).prod(-1)
+        region_owners = torch.arange(
+            len(current_boxes), device=current_boxes.device)
+        valid_regions = box_areas > 0
+        visible_regions = visible_regions[valid_regions]
+        region_owners = region_owners[valid_regions]
 
         for idx in range(1, len(batch_data_samples)):
             curr_img = batch_inputs[idx]
+            src_h, src_w = batch_data_samples[idx].img_shape[:2]
+            if not (0 < src_h <= curr_img.shape[-2]
+                    and 0 < src_w <= curr_img.shape[-1]):
+                raise ValueError(
+                    'Source img_shape must fit inside its input tensor')
+            curr_img = curr_img[:, :src_h, :src_w]
             curr_instances = batch_data_samples[idx].gt_instances
             curr_scores = reliability_scores[idx]
-
             reliable_mask = curr_scores > threshold
+            if score_threshold is not None:
+                reliable_mask &= curr_instances.scores > score_threshold
             if not reliable_mask.any():
                 continue
-            curr_reliable_boxes = curr_instances.bboxes[reliable_mask]
             curr_reliable_instances = curr_instances[reliable_mask]
             curr_reliable_scores = curr_scores[reliable_mask]
-            if len(curr_reliable_boxes) == 0:
-                continue
-
             enhanced_boxes, enhanced_img_regions = self._apply_random_augmentation(
-                curr_img, curr_reliable_boxes, curr_reliable_instances
-            )
+                curr_img, curr_reliable_instances.bboxes,
+                curr_reliable_instances)
+            if (len(enhanced_boxes) != len(curr_reliable_instances) or
+                    len(enhanced_img_regions) != len(curr_reliable_instances)):
+                raise ValueError(
+                    'Augmented boxes and image regions must match instances')
 
-            if len(current_boxes) > 0:
-                ious = bbox_overlaps(enhanced_boxes, current_boxes)
-                non_overlap_threshold = self.semi_train_cfg.get('non_overlap_threshold', 0.3)
-                non_overlap_mask = (ious.max(dim=1)[0] < non_overlap_threshold)
-            else:
-                non_overlap_mask = torch.ones(len(enhanced_boxes), dtype=torch.bool)
-            
-            if not non_overlap_mask.any():
-                continue
+            for i, (box, region) in enumerate(
+                    zip(enhanced_boxes, enhanced_img_regions)):
+                if region is None or not torch.isfinite(box).all():
+                    continue
+                left, top, right, bottom = map(int, box.tolist())
+                if right <= left or bottom <= top:
+                    continue
+                if (region.ndim != 3 or region.shape[0] != target_img.shape[0]
+                        or region.shape[-2:] != (bottom - top, right - left)):
+                    raise ValueError(
+                        'Each image region must fit its placement box')
 
-            for i, (box, img_region) in enumerate(zip(enhanced_boxes[non_overlap_mask], enhanced_img_regions)):
-                if img_region is not None:
-                    x1, y1, x2, y2 = map(int, box.tolist())
-                    x1, y1 = max(0, x1), max(0, y1)
-                    x2, y2 = min(target_img.shape[-1], x2), min(target_img.shape[-2], y2)
-                    if x2 > x1 and y2 > y1:
-                        region_h, region_w = y2 - y1, x2 - x1
-                        if img_region.shape[-2:] != (region_h, region_w):
-                            img_region = F.interpolate(
-                                img_region.unsqueeze(0), 
-                                size=(region_h, region_w), 
-                                mode='bilinear', 
-                                align_corners=False
-                            ).squeeze(0)
-                        target_img[:, y1:y2, x1:x2] = img_region
-        
-            enhanced_reliable_instances = curr_reliable_instances[non_overlap_mask]
-            enhanced_reliable_instances.bboxes = enhanced_boxes[non_overlap_mask]
-            
-            if len(enhanced_reliable_instances) > 0:
-                merged_instances = merged_instances.cat([merged_instances, enhanced_reliable_instances])
+                x1, y1 = max(0, left), max(0, top)
+                x2, y2 = min(target_w, right), min(target_h, bottom)
+                if x2 <= x1 or y2 <= y1:
+                    continue
+                visible_box = box.new_tensor([x1, y1, x2, y2])
+                if len(current_boxes) > 0:
+                    ious = bbox_overlaps(visible_box[None].float(),
+                                         current_boxes.float())
+                    if ious.max() >= overlap_threshold:
+                        continue
+
+                patch_box = visible_box.to(visible_regions)
+                intersection_lt = torch.maximum(visible_regions[:, :2],
+                                                patch_box[:2])
+                intersection_rb = torch.minimum(visible_regions[:, 2:],
+                                                patch_box[2:])
+                intersecting = (intersection_rb > intersection_lt).all(-1)
+                next_regions, next_owners = visible_regions, region_owners
+                if intersecting.any():
+                    if occlusion_threshold == 0:
+                        continue
+                    # Keep disjoint visible pieces so overlap is counted once.
+                    rectangles = visible_regions[intersecting]
+                    left_top = intersection_lt[intersecting]
+                    right_bottom = intersection_rb[intersecting]
+                    pieces = torch.stack([
+                        torch.stack((rectangles[:, 0], rectangles[:, 1],
+                                     left_top[:, 0], rectangles[:, 3]), -1),
+                        torch.stack((right_bottom[:, 0], rectangles[:, 1],
+                                     rectangles[:, 2], rectangles[:, 3]), -1),
+                        torch.stack((left_top[:, 0], rectangles[:, 1],
+                                     right_bottom[:, 0], left_top[:, 1]), -1),
+                        torch.stack((left_top[:, 0], right_bottom[:, 1],
+                                     right_bottom[:, 0], rectangles[:, 3]), -1)
+                    ], dim=1).reshape(-1, 4)
+                    piece_owners = region_owners[intersecting].repeat_interleave(
+                        4)
+                    nonempty = (pieces[:, 2:] > pieces[:, :2]).all(-1)
+                    next_regions = torch.cat(
+                        [visible_regions[~intersecting], pieces[nonempty]])
+                    next_owners = torch.cat(
+                        [region_owners[~intersecting], piece_owners[nonempty]])
+                    remaining_areas = box_areas.new_zeros(len(box_areas))
+                    remaining_areas.index_add_(
+                        0, next_owners,
+                        (next_regions[:, 2:] - next_regions[:, :2]).prod(-1))
+                    occluded_ratio = (
+                        (box_areas - remaining_areas).clamp_min(0) /
+                        box_areas.clamp_min(torch.finfo(area_dtype).tiny))
+                    if ((occluded_ratio > 0)
+                            & (occluded_ratio >= occlusion_threshold)).any():
+                        continue
+
+                # Crop the corresponding pixels when a patch crosses the edge.
+                visible_region = region[:, y1 - top:y2 - top,
+                                        x1 - left:x2 - left]
+                target_img[:, y1:y2, x1:x2] = visible_region.to(target_img)
+                instance = curr_reliable_instances[i:i + 1].clone()
+                instance.bboxes = visible_box[None]
+                merged_instances = merged_instances.cat(
+                    [merged_instances, instance])
                 current_boxes = merged_instances.bboxes
-                enhanced_reliable_scores = curr_reliable_scores[non_overlap_mask]
-                merged_reliability_scores[0] = torch.cat([merged_reliability_scores[0], enhanced_reliable_scores])
-    
+                merged_reliability_scores[0] = torch.cat([
+                    merged_reliability_scores[0], curr_reliable_scores[i:i + 1]
+                ])
+                # A pasted object's visibility starts when it is inserted.
+                visible_regions = torch.cat([next_regions, patch_box[None]])
+                region_owners = torch.cat([
+                    next_owners, region_owners.new_tensor([len(box_areas)])
+                ])
+                box_areas = torch.cat([
+                    box_areas, (patch_box[2:] - patch_box[:2]).prod().reshape(1)
+                ])
+
         batch_inputs[0] = target_img
         batch_data_samples[0].gt_instances = merged_instances
-        
-        
-        for idx in range(1, len(reliability_scores)):
-            merged_reliability_scores.append(reliability_scores[idx])
-    
+        merged_reliability_scores.extend(reliability_scores[1:])
         return batch_inputs, batch_data_samples, merged_reliability_scores
 
     def _apply_random_augmentation(self, img, boxes, instances):
         enhanced_boxes = boxes.clone()
-        enhanced_img_regions = []
-        
+        enhanced_img_regions = [None] * len(boxes)
+
         for i, box in enumerate(boxes):
-            x1, y1, x2, y2 = map(int, box.tolist())
-            x1, y1 = max(0, x1), max(0, y1)
-            x2, y2 = min(img.shape[-1], x2), min(img.shape[-2], y2)
-            
+            if (not torch.isfinite(box).all() or box[2] <= box[0]
+                    or box[3] <= box[1]):
+                continue
+            x1 = max(0, math.floor(box[0].item()))
+            y1 = max(0, math.floor(box[1].item()))
+            x2 = min(img.shape[-1], math.ceil(box[2].item()))
+            y2 = min(img.shape[-2], math.ceil(box[3].item()))
             if x2 <= x1 or y2 <= y1:
-                enhanced_img_regions.append(None)
                 continue
 
-            img_region = img[:, y1:y2, x1:x2].clone()
-
-            aug_type = torch.randint(0, 2, (1,)).item()  # 0: 缩放, 1: 旋转
-            
-            if aug_type == 0:  
-                scale_factor = (0.95 + torch.rand(1) * 0.1).item()
-
-                original_h, original_w = img_region.shape[-2:]
-                new_h, new_w = int(original_h * scale_factor), int(original_w * scale_factor)
-                
-                if new_h > 0 and new_w > 0:
-                    scaled_region = F.interpolate(
-                        img_region.unsqueeze(0),
-                        size=(new_h, new_w),
-                        mode='bilinear',
-                        align_corners=False
-                    ).squeeze(0)
-
-                    center_x, center_y = (x1 + x2) / 2, (y1 + y2) / 2
-                    new_half_w, new_half_h = new_w / 2, new_h / 2
-                    
-                    new_x1 = max(0, center_x - new_half_w)
-                    new_y1 = max(0, center_y - new_half_h)
-                    new_x2 = min(img.shape[-1], center_x + new_half_w)
-                    new_y2 = min(img.shape[-2], center_y + new_half_h)
-                    
-                    enhanced_boxes[i] = torch.tensor([new_x1, new_y1, new_x2, new_y2], 
-                                                    device=box.device, dtype=box.dtype)
-                    enhanced_img_regions.append(scaled_region)
-                else:
-                    enhanced_img_regions.append(img_region)
-
+            region = img[:, y1:y2, x1:x2].clone()
+            if region.dtype not in (torch.float32, torch.float64):
+                region = region.float()
+            aug_type = torch.randint(0, 2, (1, )).item()
+            if aug_type == 0:
+                scale_factor = 0.95 + torch.rand(1).item() * 0.1
+                new_h = max(1, int(round(region.shape[-2] * scale_factor)))
+                new_w = max(1, int(round(region.shape[-1] * scale_factor)))
+                region = F.interpolate(
+                    region.unsqueeze(0),
+                    size=(new_h, new_w),
+                    mode='bilinear',
+                    align_corners=False).squeeze(0)
+            else:
+                from torchvision.transforms import InterpolationMode
                 from torchvision.transforms import functional as TF
-                import math
-                
 
-                rotation_angle = (torch.rand(1).item() - 0.5) * 50  
-                angle_rad = math.radians(rotation_angle)
+                angle = (torch.rand(1).item() - 0.5) * 50
+                # Keep normalized pixel values and channel order throughout.
+                region = TF.rotate(
+                    region,
+                    angle,
+                    interpolation=InterpolationMode.BILINEAR,
+                    expand=True,
+                    fill=0.)
 
-                if img_region.max() <= 1.0:
-                    img_region_pil = TF.to_pil_image(img_region)
-                else:
-                    img_region_pil = TF.to_pil_image(img_region / 255.0)
+            new_h, new_w = region.shape[-2:]
+            left = math.floor((x1 + x2 - new_w) / 2)
+            top = math.floor((y1 + y2 - new_h) / 2)
+            enhanced_boxes[i] = box.new_tensor(
+                [left, top, left + new_w, top + new_h])
+            enhanced_img_regions[i] = region.to(dtype=img.dtype)
 
-                rotated_pil = TF.rotate(img_region_pil, rotation_angle, expand=True)
-                rotated_region = TF.to_tensor(rotated_pil)
-
-                new_h, new_w = rotated_region.shape[1], rotated_region.shape[2]
-
-                orig_h, orig_w = img_region.shape[1], img_region.shape[2]
-                center_x = box[0] + orig_w / 2
-                center_y = box[1] + orig_h / 2
-
-                new_x1 = center_x - new_w / 2
-                new_y1 = center_y - new_h / 2
-                new_x2 = center_x + new_w / 2
-                new_y2 = center_y + new_h / 2
-
-                rotated_box = box.clone()
-                rotated_box[0] = new_x1
-                rotated_box[1] = new_y1
-                rotated_box[2] = new_x2
-                rotated_box[3] = new_y2
-                
-                enhanced_boxes[i] = rotated_box
-                enhanced_img_regions.append(rotated_region)
-                
         return enhanced_boxes, enhanced_img_regions
 
-    def calculate_corner_distance_loss(self, batch_unsup_inputs, batch_unsup_data_samples, filtered_reliability_scores, reliability_threshold=0.3, iou_threshold=0.2, k=2):
+    def calculate_corner_distance_loss(self,
+                                       batch_unsup_inputs,
+                                       batch_unsup_data_samples,
+                                       filtered_reliability_scores,
+                                       reliability_threshold=0.5,
+                                       iou_threshold=0.1,
+                                       k=2):
+        batch_size = len(batch_unsup_data_samples)
+        if (len(batch_unsup_inputs) != batch_size
+                or len(filtered_reliability_scores) != batch_size):
+            raise ValueError('Inputs, samples and reliability must match')
+        if not 0 <= iou_threshold <= 1 or k <= 0:
+            raise ValueError('IoU threshold must be in [0, 1] and k positive')
 
-        with torch.no_grad():
-            student_results = self.student(batch_unsup_inputs, batch_unsup_data_samples, mode='predict')
-        
-        total_loss = 0.0
+        total_loss = batch_unsup_inputs.new_zeros(())
+        for parameter in self.student.parameters():
+            if parameter.requires_grad:
+                total_loss = parameter.reshape(-1)[:1].sum() * 0
+                break
+        if batch_size == 0:
+            return total_loss
+
+        # Prediction writes into data samples; keep that graph out of the cache.
+        prediction_samples = copy.deepcopy(batch_unsup_data_samples)
+        student_results = self.student.predict(
+            batch_unsup_inputs, prediction_samples, rescale=False)
+        if len(student_results) != batch_size:
+            raise ValueError('Student predictions must match the batch size')
         valid_pairs = 0
 
-        for i, (student_result, data_sample, reliability_scores) in enumerate(
-            zip(student_results, batch_unsup_data_samples, filtered_reliability_scores)
-        ):
-            student_bboxes = student_result.pred_instances.bboxes
-
-            teacher_bboxes = data_sample.gt_instances.bboxes
-            teacher_reliability = reliability_scores
-
-            reliable_mask = teacher_reliability >= reliability_threshold
-            if not reliable_mask.any():
+        for student_result, data_sample, reliability_scores in zip(
+                student_results, batch_unsup_data_samples,
+                filtered_reliability_scores):
+            student_bboxes = student_result.pred_instances.bboxes.float()
+            teacher_bboxes = data_sample.gt_instances.bboxes.detach().to(
+                student_bboxes)
+            if (reliability_scores.ndim != 1
+                    or len(reliability_scores) != len(teacher_bboxes)):
+                raise ValueError(
+                    'Each teacher box must have one reliability score')
+            reliable_mask = reliability_scores.detach().to(
+                teacher_bboxes.device) > reliability_threshold
+            teacher_bboxes = teacher_bboxes[reliable_mask]
+            if len(teacher_bboxes) == 0 or len(student_bboxes) == 0:
                 continue
-                
-            reliable_teacher_bboxes = teacher_bboxes[reliable_mask]
-            
-            if len(reliable_teacher_bboxes) == 0 or len(student_bboxes) == 0:
-                continue
 
-            from mmdet.structures.bbox import bbox_overlaps
-            ious = bbox_overlaps(student_bboxes, reliable_teacher_bboxes)
+            # Matching chooses indices; the selected student boxes keep gradients.
+            with torch.no_grad():
+                ious = bbox_overlaps(student_bboxes.detach(), teacher_bboxes)
+                max_ious, matched_student_indices = ious.max(dim=0)
+                valid_matches = max_ious > iou_threshold
+            if valid_matches.any():
+                matched_boxes = student_bboxes[
+                    matched_student_indices[valid_matches]]
+                pair_losses = self._compute_corner_loss(
+                    matched_boxes, teacher_bboxes[valid_matches], k=k)
+                total_loss = total_loss + pair_losses.sum()
+                valid_pairs += pair_losses.numel()
 
-            max_ious, matched_student_indices = ious.max(dim=0)
-            
-           
-            valid_matches = max_ious > self.semi_train_cfg.get('corner_loss_iou_threshold', 0.1)  
-            
-            if not valid_matches.any():
-                continue
-            
+        return total_loss / max(valid_pairs, 1)
 
-            for j, (teacher_idx, student_idx) in enumerate(
-                zip(torch.where(valid_matches)[0], matched_student_indices[valid_matches])
-            ):
-                teacher_box = reliable_teacher_bboxes[teacher_idx]
-                student_box = student_bboxes[student_idx]
-                
-                corner_loss = self._compute_corner_loss(student_box, teacher_box)
-                total_loss += corner_loss
-                valid_pairs += 1
-        
-
-        if valid_pairs > 0:
-            return total_loss / valid_pairs
-        else:
-            return torch.tensor(0.0, device=batch_unsup_inputs[0].device, requires_grad=True)
-    
     def _compute_corner_loss(self, box1, box2, k=2):
+        box1, box2 = box1.float(), box2.float()
+        numerator = 2 * (box1 - box2).square().sum(dim=-1)
+        enclosing_wh = (
+            torch.maximum(box1[..., 2:], box2[..., 2:]) -
+            torch.minimum(box1[..., :2], box2[..., :2]))
+        diagonal_sq = enclosing_wh.square().sum(dim=-1).clamp_min(1e-16)
+        return numerator / diagonal_sq.pow(k / 2)
 
-
-        corners1 = torch.stack([
-            torch.stack([box1[0], box1[1]]),  # 左上
-            torch.stack([box1[2], box1[1]]),  # 右上
-            torch.stack([box1[2], box1[3]]),  # 右下
-            torch.stack([box1[0], box1[3]])   # 左下
-        ])
-        
-        corners2 = torch.stack([
-            torch.stack([box2[0], box2[1]]),  # 左上
-            torch.stack([box2[2], box2[1]]),  # 右上
-            torch.stack([box2[2], box2[3]]),  # 右下
-            torch.stack([box2[0], box2[3]])   # 左下
-        ])
-
-        corner_distances_sq = torch.sum((corners1 - corners2) ** 2, dim=1)
-        numerator = torch.sum(corner_distances_sq)
-
-        min_x = torch.min(box1[0], box2[0])
-        max_x = torch.max(box1[2], box2[2])
-        min_y = torch.min(box1[1], box2[1])
-        max_y = torch.max(box1[3], box2[3])
-        
-        l_c = torch.sqrt((max_x - min_x) ** 2 + (max_y - min_y) ** 2)
-
-        epsilon = 1e-8
-        l_c = torch.max(l_c, torch.tensor(epsilon, device=l_c.device))
-
-        corner_loss = numerator / (l_c ** k)
-        return corner_loss
+    def loss_by_pseudo_instances(self,
+                                 batch_inputs: Tensor,
+                                 batch_data_samples: SampleList,
+                                 batch_info: Optional[dict] = None) -> dict:
+        if len(batch_inputs) != len(batch_data_samples):
+            raise ValueError('Inputs and samples must have equal batch size')
+        batch_data_samples = filter_gt_instances(
+            batch_data_samples,
+            score_thr=self.semi_train_cfg.get('cls_pseudo_thr', 0.7))
+        valid_indices = [
+            i for i, sample in enumerate(batch_data_samples)
+            if len(sample.gt_instances) >= self.semi_train_cfg.least_num
+        ]
+        if valid_indices and len(valid_indices) < len(batch_data_samples):
+            batch_inputs = batch_inputs[valid_indices]
+            batch_data_samples = [batch_data_samples[i] for i in valid_indices]
+        unsup_weight = self.semi_train_cfg.unsup_weight if valid_indices else 0.
+        losses = self.student.loss(batch_inputs, batch_data_samples)
+        reliability_scores = [
+            sample.gt_instances.reliability for sample in batch_data_samples
+        ]
+        losses['loss_corner'] = self.calculate_corner_distance_loss(
+            batch_inputs,
+            batch_data_samples,
+            reliability_scores,
+            reliability_threshold=self.semi_train_cfg.get(
+                'reliability_threshold', 0.5),
+            iou_threshold=self.semi_train_cfg.get(
+                'corner_loss_iou_threshold',
+                self.semi_train_cfg.get('iou_threshold', 0.1)),
+            k=self.semi_train_cfg.get('corner_loss_k', 2))
+        return rename_loss_dict('unsup_',
+                                reweight_loss_dict(losses, unsup_weight))
 
     def loss(self, multi_batch_inputs: Dict[str, Tensor],
              multi_batch_data_samples: Dict[str, SampleList]) -> dict:
+        cache_size = self._get_cache_size()
+        cache_count = len(self.cache_inputs)
+        if cache_count != len(self.cache_data_samples):
+            raise ValueError('Image and annotation cache lengths must match')
         losses = dict()
         losses.update(**self.loss_by_gt_instances(
             multi_batch_inputs['sup'], multi_batch_data_samples['sup']))
@@ -320,32 +394,26 @@ class RSOD(SemiBaseDetector):
 
         batch_unsup_inputs = copy.deepcopy(multi_batch_inputs['unsup_student'])
         batch_unsup_data_samples = copy.deepcopy(multi_batch_data_samples['unsup_student'])
-        batch_unsup_inputs, batch_unsup_data_samples, filtered_reliability_scores = self.merge_reliable_instances(
+        batch_unsup_inputs, batch_unsup_data_samples, _ = self.merge_reliable_instances(
             batch_unsup_inputs, 
             batch_unsup_data_samples,
             filtered_reliability_scores,
-            threshold=self.semi_train_cfg.get('reliability_threshold', 0.3)
+            threshold=self.semi_train_cfg.get('reliability_threshold', 0.5)
         )
-        
-        corner_loss = self.calculate_corner_distance_loss(
-            batch_unsup_inputs,
-            batch_unsup_data_samples,
-            filtered_reliability_scores,
-            reliability_threshold=self.semi_train_cfg.get('reliability_threshold', 0.3),
-            iou_threshold=self.semi_train_cfg.get('iou_threshold', 0.2),
-            k=self.semi_train_cfg.get('corner_loss_k', 2)
-        )
-
-        corner_loss_weight = self.semi_train_cfg.get('corner_loss_weight', 0.5)
-        losses['corner_loss'] = corner_loss * corner_loss_weight
         
         batch_unsup_inputs, batch_unsup_data_samples = self.merge(
             *zip(*list(map(self.erase, *self.split(batch_unsup_inputs, batch_unsup_data_samples)))))
 
         sample_size = len(multi_batch_data_samples['unsup_student'])
-        mixup_idxs = np.random.choice(range(sample_size), sample_size, replace=False)
-        mosaic_idxs = np.random.choice(range(4), 4, replace=False) + sample_size
-        if self.semi_train_cfg.mixup and len(self.cache_inputs) == self.semi_train_cfg.cache_size:
+        cache_ready = cache_size > 0 and cache_count >= cache_size
+        use_mixup = (self.semi_train_cfg.mixup and cache_ready
+                     and 0 < sample_size <= cache_count)
+        use_mosaic = (self.semi_train_cfg.mosaic and cache_ready
+                      and cache_count >= 4)
+        cache_order = (np.random.permutation(cache_count)
+                       if use_mixup or use_mosaic else None)
+        if use_mixup:
+            mixup_idxs = cache_order[:sample_size]
             dst_inputs_list, batch_dst_data_samples = self.split(
                 batch_unsup_inputs, batch_unsup_data_samples)
             img_shapes = [tuple(batch_unsup_inputs.shape[-2:])]*batch_unsup_inputs.shape[0]
@@ -362,25 +430,15 @@ class RSOD(SemiBaseDetector):
             losses.update(**self.loss_by_pseudo_instances(
                 batch_unsup_inputs, batch_unsup_data_samples))
 
-        if self.semi_train_cfg.mosaic and len(self.cache_inputs) == self.semi_train_cfg.cache_size:
-            if len(self.semi_train_cfg.mosaic_shape) == 1:
-                img_shapes = [self.semi_train_cfg.mosaic_shape[0]] * 4
-            else:
-                mosaic_shape = self.semi_train_cfg.mosaic_shape
-                mosaic_h = np.random.randint(
-                    min(mosaic_shape[0][0], mosaic_shape[1][0]), max(mosaic_shape[0][0], mosaic_shape[1][0]))
-                mosaic_w = np.random.randint(
-                    min(mosaic_shape[0][1], mosaic_shape[1][1]), max(mosaic_shape[0][1], mosaic_shape[1][1]))
-                img_shapes = [(mosaic_h, mosaic_w)] * 4
+        if use_mosaic:
+            mosaic_start = sample_size if use_mixup else 0
+            mosaic_idxs = np.roll(cache_order, -mosaic_start)[:4]
+            img_shapes = [self._sample_mosaic_shape()] * 4
             src_inputs_list, batch_src_data_samples = self.get_batch(mosaic_idxs, img_shapes)
             mosaic_inputs, mosaic_data_samples = self.mosaic(src_inputs_list, batch_src_data_samples)
             mosaic_losses = self.loss_by_pseudo_instances(mosaic_inputs, mosaic_data_samples)
             losses.update(**rename_loss_dict('mosaic_', reweight_loss_dict(mosaic_losses, self.semi_train_cfg.mosaic_weight)))
-        losses.update(**self.loss_by_pseudo_instances(
-            batch_unsup_inputs, batch_unsup_data_samples))
-        
 
-        
         self.update_cache(multi_batch_inputs['unsup_student'], multi_batch_data_samples['unsup_student'])
         return losses
 
@@ -410,9 +468,48 @@ class RSOD(SemiBaseDetector):
             data_samples.pop('pad_shape')
         return inputs_list, batch_data_samples
 
+    def _sample_mosaic_shape(self):
+        """Sample each resize bound independently, keeping equal bounds fixed."""
+        shapes = self.semi_train_cfg.get('mosaic_shape')
+        message = ('mosaic_shape must contain one or two (height, width) '
+                   'pairs of positive integers')
+        if not isinstance(shapes, (list, tuple)) or len(shapes) not in (1, 2):
+            raise ValueError(message)
+        for shape in shapes:
+            if not isinstance(shape, (list, tuple)) or len(shape) != 2:
+                raise ValueError(message)
+            if any(isinstance(value, (bool, np.bool_))
+                   or not isinstance(value, (int, np.integer))
+                   or value <= 0 for value in shape):
+                raise ValueError(message)
+        if len(shapes) == 1:
+            return tuple(int(value) for value in shapes[0])
+        sampled = []
+        for first, second in zip(*shapes):
+            lower, upper = sorted((int(first), int(second)))
+            sampled.append(lower if lower == upper else
+                           int(np.random.randint(lower, upper)))
+        return tuple(sampled)
+
+    def _get_cache_size(self):
+        cache_size = self.semi_train_cfg.get('cache_size', 8)
+        if (isinstance(cache_size, (bool, np.bool_))
+                or not isinstance(cache_size, (int, np.integer))
+                or cache_size < 0):
+            raise ValueError('cache_size must be a non-negative integer')
+        return int(cache_size)
+
     def update_cache(self, batch_inputs: Tensor, batch_data_samples: SampleList):
+        cache_size = self._get_cache_size()
+        if len(self.cache_inputs) != len(self.cache_data_samples):
+            raise ValueError('Image and annotation cache lengths must match')
+        if len(batch_inputs) != len(batch_data_samples):
+            raise ValueError('Inputs and samples must have equal batch size')
+        if cache_size == 0:
+            self.cache_inputs.clear()
+            self.cache_data_samples.clear()
+            return
         inputs_list, batch_data_samples = self.split(batch_inputs, batch_data_samples)
-        cache_size = self.semi_train_cfg.cache_size
         self.cache_inputs.extend(inputs_list)
         self.cache_data_samples.extend(batch_data_samples)
         self.cache_inputs = self.cache_inputs[-cache_size:]
@@ -433,21 +530,47 @@ class RSOD(SemiBaseDetector):
         return inputs_list, batch_data_samples
 
     def resize(self, inputs, data_samples, img_shape):
-        scale = min(img_shape[0] / data_samples.img_shape[0], img_shape[1] / data_samples.img_shape[1])
-        inputs = F.interpolate(inputs.unsqueeze(0), scale_factor=scale).squeeze(0)
-        data_samples.pop('img_shape')
-        data_samples.pop('scale_factor')
-        img_h, img_w = inputs.shape[-2:]
-        data_samples.set_metainfo({'img_shape': (img_h, img_w)})
-        ori_h, ori_w = data_samples.ori_shape
-        data_samples.set_metainfo({'scale_factor': (img_w / ori_w, img_h / ori_h)})
-        hm = data_samples.pop('homography_matrix')
-        matrix = np.array([[scale, 0, 0], [0, scale, 0], [0, 0, 1]], dtype=np.float32)
-        data_samples.set_metainfo({'homography_matrix': matrix @ hm})
-        data_samples.gt_instances.bboxes *= scale
-        data_samples.gt_instances.bboxes[:, 0::2].clamp_(0, img_w)
-        data_samples.gt_instances.bboxes[:, 1::2].clamp_(0, img_h)
-        return inputs, filter_gt_instances([data_samples])[0]
+        if (not isinstance(img_shape, (list, tuple)) or len(img_shape) != 2
+                or any(isinstance(value, (bool, np.bool_))
+                       or not isinstance(value, (int, np.integer))
+                       or value <= 0 for value in img_shape)):
+            raise ValueError('Resize bounds must be two positive integers')
+        source_shape = data_samples.get('img_shape', ())
+        if (inputs.ndim != 3 or not isinstance(source_shape, (list, tuple))
+                or len(source_shape) < 2
+                or any(isinstance(value, (bool, np.bool_))
+                       or not isinstance(value, (int, np.integer))
+                       for value in source_shape[:2])):
+            raise ValueError('img_shape must describe a valid input image')
+        source_h, source_w = map(int, source_shape[:2])
+        if not (0 < source_h <= inputs.shape[-2]
+                and 0 < source_w <= inputs.shape[-1]):
+            raise ValueError('img_shape must fit inside the input tensor')
+        bound_h, bound_w = map(int, img_shape)
+        img_h = max(1, min(bound_h, source_h * bound_w // source_w))
+        img_w = max(1, min(bound_w, source_w * bound_h // source_h))
+        image = inputs[:, :source_h, :source_w]
+        if image.dtype in (torch.float16, torch.bfloat16):
+            image = image.float()
+        resized = F.interpolate(
+            image.unsqueeze(0), size=(img_h, img_w),
+            mode='nearest').squeeze(0).to(dtype=inputs.dtype)
+
+        scale_x, scale_y = img_w / source_w, img_h / source_h
+        matrix = np.array([[scale_x, 0, 0], [0, scale_y, 0], [0, 0, 1]],
+                          dtype=np.float32)
+        homography = matrix @ data_samples.homography_matrix
+        boxes = data_samples.gt_instances.bboxes
+        boxes = boxes * boxes.new_tensor([scale_x, scale_y, scale_x, scale_y])
+        boxes[:, 0::2].clamp_(0, img_w)
+        boxes[:, 1::2].clamp_(0, img_h)
+        ori_h, ori_w = data_samples.ori_shape[:2]
+        data_samples.set_metainfo(dict(
+            img_shape=(img_h, img_w),
+            scale_factor=(img_w / ori_w, img_h / ori_h),
+            homography_matrix=homography))
+        data_samples.gt_instances.bboxes = boxes
+        return resized, filter_gt_instances([data_samples])[0]
 
     def flip(self, inputs, data_samples):
         inputs = inputs.flip(-1)
@@ -468,36 +591,73 @@ class RSOD(SemiBaseDetector):
         return inputs, data_samples
 
     def erase(self, inputs, data_samples):
+        if not self.semi_train_cfg.get('erase', True):
+            return inputs, data_samples
+
         def _get_patches(img_shape):
             patches = []
-            n_patches = np.random.randint(
-                self.semi_train_cfg.erase_patches[0], self.semi_train_cfg.erase_patches[1])
+            n_patches = np.random.randint(self.semi_train_cfg.erase_patches[0],
+                                          self.semi_train_cfg.erase_patches[1])
             for _ in range(n_patches):
                 ratio = np.random.random() * \
                         (self.semi_train_cfg.erase_ratio[1] - self.semi_train_cfg.erase_ratio[0]) + \
                         self.semi_train_cfg.erase_ratio[0]
                 ph, pw = int(img_shape[0] * ratio), int(img_shape[1] * ratio)
-                px1 = np.random.randint(0, img_shape[1] - pw)
-                py1 = np.random.randint(0, img_shape[0] - ph)
+                px1 = np.random.randint(0, img_shape[1] - pw + 1)
+                py1 = np.random.randint(0, img_shape[0] - ph + 1)
                 px2, py2 = px1 + pw, py1 + ph
                 patches.append([px1, py1, px2, py2])
-            return torch.tensor(patches).to(self.data_preprocessor.device)
+            return patches
+
         erase_patches = _get_patches(data_samples.img_shape)
+        if not erase_patches:
+            return inputs, data_samples
         for patch in erase_patches:
             px1, py1, px2, py2 = patch
             inputs[:, py1:py2, px1:px2] = 0
         bboxes = data_samples.gt_instances.bboxes
-        left_top = torch.maximum(bboxes[:, None, :2], erase_patches[:, :2])
-        right_bottom = torch.minimum(bboxes[:, None, 2:], erase_patches[:, 2:])
-        wh = torch.clamp(right_bottom - left_top, 0)
-        inter_areas = wh[:, :, 0] * wh[:, :, 1]
-        bbox_areas = (bboxes[:, 2] - bboxes[:, 0]) * (bboxes[:, 3] - bboxes[:, 1])
-        bboxes_erased_ratio = inter_areas.sum(-1) / (bbox_areas + 1e-7)
+        if len(bboxes) == 0:
+            return inputs, data_samples
+        patches = torch.tensor(erase_patches, device=bboxes.device)
+        erased_areas = self._bbox_erased_areas(bboxes, patches)
+        coordinates = bboxes.to(dtype=erased_areas.dtype)
+        bbox_areas = (coordinates[:, 2:] -
+                      coordinates[:, :2]).clamp_min(0).prod(-1)
+        bboxes_erased_ratio = (erased_areas / (bbox_areas + 1e-7)).clamp(0, 1)
         valid_inds = bboxes_erased_ratio < self.semi_train_cfg.erase_thr
         data_samples.gt_instances = data_samples.gt_instances[valid_inds]
         return inputs, data_samples
 
-    def mixup(self, dst_inputs_list, batch_dst_data_samples, src_inputs_list, batch_src_data_samples, noise_std=0.01):
+    @staticmethod
+    def _bbox_erased_areas(bboxes, patches):
+        """Intersect each box with the union of all erased rectangles."""
+        boxes = bboxes if bboxes.dtype == torch.float64 else bboxes.float()
+        areas = boxes.new_zeros(len(boxes))
+        if boxes.numel() == 0 or patches.numel() == 0:
+            return areas
+        patches = patches.to(boxes).reshape(-1, 4)
+        patches = patches[(patches[:, 2] > patches[:, 0])
+                          & (patches[:, 3] > patches[:, 1])]
+        if len(patches) == 0:
+            return areas
+
+        # Patch edges partition the union into disjoint rectangular cells.
+        xs = patches[:, [0, 2]].flatten().unique(sorted=True)
+        ys = patches[:, [1, 3]].flatten().unique(sorted=True)
+        covered_x = ((xs[:-1][None] >= patches[:, 0, None])
+                     & (xs[1:][None] <= patches[:, 2, None]))
+        covered_y = ((ys[:-1][None] >= patches[:, 1, None])
+                     & (ys[1:][None] <= patches[:, 3, None]))
+        covered = (covered_y[:, :, None] & covered_x[:, None, :]).any(dim=0)
+        widths = (torch.minimum(boxes[:, 2, None], xs[None, 1:]) -
+                  torch.maximum(boxes[:, 0, None], xs[None, :-1])).clamp_min(0)
+        heights = (
+            torch.minimum(boxes[:, 3, None], ys[None, 1:]) -
+            torch.maximum(boxes[:, 1, None], ys[None, :-1])).clamp_min(0)
+        return (heights[:, :, None] * widths[:, None, :] *
+                covered[None]).sum(dim=(1, 2))
+
+    def mixup(self, dst_inputs_list, batch_dst_data_samples, src_inputs_list, batch_src_data_samples):
         batch_size = len(dst_inputs_list)
         mixup_inputs_list, batch_mixup_data_samples = [], []
         for i in range(batch_size):
@@ -530,7 +690,7 @@ class RSOD(SemiBaseDetector):
             batch_mixup_data_samples.append(mixup_data_samples)
         return mixup_inputs_list, batch_mixup_data_samples
 
-    def mosaic(self, inputs_list, batch_data_samples, noise_std=0.01):
+    def mosaic(self, inputs_list, batch_data_samples):
         batch_size = len(inputs_list)
         h, w = 0, 0
         for i in range(batch_size):
@@ -570,103 +730,137 @@ class RSOD(SemiBaseDetector):
         return mosaic_inputs, mosaic_data_samples
 
 class EnhancedReliabilityCalculator(nn.Module):
-    def __init__(self, 
-                temp=0.2,
-                min_scale=0.8,
-                max_scale=1.2):
-        super().__init__()  
-        self.temp = temp              # 温度参数
+
+    def __init__(self, temp=0.6, min_scale=0.8, max_scale=1.2):
+        super().__init__()
+        if temp <= 0 or not 0 < min_scale <= max_scale:
+            raise ValueError('Temperature and scale bounds must be positive')
+        self.temp = temp
         self.scale_factors = [min_scale, max_scale]
 
-        
-    def _transform_bboxes(self, data_sample, transform_info):
+    def _build_view(self, inputs, data_samples, scale_factor, flip,
+                    pad_size_divisor, pad_value):
+        images, view_samples = [], []
+        for image, sample in zip(inputs, data_samples):
+            img_h, img_w = sample.img_shape[:2]
+            if not (0 < img_h <= image.shape[-2]
+                    and 0 < img_w <= image.shape[-1]):
+                raise ValueError('img_shape must fit inside the input tensor')
 
-        pred_instances = data_sample.pred_instances
-        bboxes = pred_instances.bboxes.clone()
-        if transform_info['flip']:
-            W = transform_info['ori_shape'][1]
-            bboxes[:, [0, 2]] = W - bboxes[:, [2, 0]]
-        scale_factor = transform_info['scale_factor']
-        bboxes = bboxes / scale_factor
-        
-        bboxes[:, 0::2].clamp_(0, transform_info['ori_shape'][1])
-        bboxes[:, 1::2].clamp_(0, transform_info['ori_shape'][0])
-        
-        return bboxes
+            # Transform valid pixels, then restore right/bottom batch padding.
+            image = image[:, :img_h, :img_w]
+            new_h = max(1, int(img_h * scale_factor))
+            new_w = max(1, int(img_w * scale_factor))
+            if (new_h, new_w) != (img_h, img_w):
+                image = F.interpolate(
+                    image.unsqueeze(0),
+                    size=(new_h, new_w),
+                    mode='bilinear',
+                    align_corners=False).squeeze(0)
+            scale_x, scale_y = new_w / img_w, new_h / img_h
+            transform = np.diag([scale_x, scale_y, 1]).astype(np.float32)
+            view_sample = copy.deepcopy(sample)
 
+            if flip:
+                image = image.flip(-1)
+                flip_matrix = np.array([[-1, 0, new_w], [0, 1, 0], [0, 0, 1]],
+                                       dtype=np.float32)
+                transform = flip_matrix @ transform
+                direction = (
+                    sample.get('flip_direction', None) if sample.get(
+                        'flip', False) else None)
+                direction = {
+                    None: 'horizontal',
+                    'horizontal': None,
+                    'vertical': 'diagonal',
+                    'diagonal': 'vertical'
+                }[direction]
+                view_sample.set_metainfo(
+                    dict(flip=direction is not None, flip_direction=direction))
+
+            homography = sample.homography_matrix
+            if isinstance(homography, Tensor):
+                homography = homography.detach().cpu().numpy()
+            homography = transform @ np.asarray(homography, dtype=np.float32)
+            original_scale = sample.get('scale_factor', (1., 1.))
+            pad_h = math.ceil(new_h / pad_size_divisor) * pad_size_divisor
+            pad_w = math.ceil(new_w / pad_size_divisor) * pad_size_divisor
+            view_sample.set_metainfo(
+                dict(
+                    img_shape=(new_h, new_w),
+                    pad_shape=(pad_h, pad_w),
+                    scale_factor=(original_scale[0] * scale_x,
+                                  original_scale[1] * scale_y),
+                    homography_matrix=homography))
+            images.append(image)
+            view_samples.append(view_sample)
+
+        batch_h = max(sample.pad_shape[0] for sample in view_samples)
+        batch_w = max(sample.pad_shape[1] for sample in view_samples)
+        view_inputs = inputs.new_full(
+            (len(images), inputs.shape[1], batch_h, batch_w), pad_value)
+        for i, (image, sample) in enumerate(zip(images, view_samples)):
+            view_inputs[i, :, :image.shape[-2], :image.shape[-1]] = image
+            sample.set_metainfo(dict(batch_input_shape=(batch_h, batch_w)))
+        return view_inputs, view_samples
+
+    def _transform_bboxes(self, data_sample):
+        bboxes = data_sample.pred_instances.bboxes.float()
+        homography = torch.as_tensor(
+            data_sample.homography_matrix,
+            device=bboxes.device,
+            dtype=bboxes.dtype)
+        return bbox_project(bboxes, homography.inverse(),
+                            data_sample.ori_shape[:2])
+
+    @torch.no_grad()
     def forward(self, teacher, inputs, data_samples):
-        orig_pred = teacher(inputs, data_samples, mode='predict')
-        
-        aug_preds = []
-        transform_infos = []
+        if inputs.ndim != 4 or inputs.shape[0] != len(data_samples):
+            raise ValueError(
+                'Input batch and data samples must have equal size')
+        if not data_samples:
+            return []
 
-        flip_inputs = inputs.flip(-1)
-        flip_pred = teacher(flip_inputs, data_samples, mode='predict')
-        for ds in data_samples:
-            transform_infos.append({
-                'flip': True,
-                'scale_factor': 1.0,
-                'ori_shape': ds.ori_shape
-            })
-        aug_preds.append(flip_pred)
-
+        preprocessor = getattr(teacher, 'data_preprocessor', None)
+        pad_size_divisor = getattr(preprocessor, 'pad_size_divisor', 32)
+        pad_value = getattr(preprocessor, 'pad_value', 0)
         scale_factor = torch.empty(1).uniform_(*self.scale_factors).item()
-        scaled_inputs = F.interpolate(
-            inputs, 
-            scale_factor=scale_factor, 
-            mode='bilinear',
-            align_corners=False,
-            recompute_scale_factor=True)
-        scale_pred = teacher(scaled_inputs, data_samples, mode='predict')
-        for ds in data_samples:
-            transform_infos.append({
-                'flip': False,
-                'scale_factor': scale_factor,
-                'ori_shape': ds.ori_shape
-            })
-        aug_preds.append(scale_pred)
-        
-        aligned_aug_bboxes = []
-        for pred_list, t_info in zip(aug_preds, transform_infos):
-            for data_sample in pred_list:
-                aligned_bbox = self._transform_bboxes(data_sample, t_info)
-                new_instance =data_sample.clone()
-                new_instance.pred_instances.bboxes = aligned_bbox
-                aligned_aug_bboxes.append(new_instance)
+        total_consistency = [
+            torch.zeros_like(sample.gt_instances.scores)
+            for sample in data_samples
+        ]
+        views = [(1., True), (scale_factor, False)]
 
-        batch_reliability = []
-        for data_sample in data_samples:
-            instances = data_sample.gt_instances
-            orig_bbox = instances.bboxes
-            orig_score = instances.scores
-            orig_labels = instances.labels
-            total_consistency = torch.zeros_like(orig_score)
-            valid_count = torch.zeros_like(orig_score)
-            for aug_inst in aligned_aug_bboxes:
-                aug_pred_instances = aug_inst.pred_instances
-                if len(aug_pred_instances) == 0 or len(orig_bbox) == 0:
-                    continue
-                iou_matrix = bbox_overlaps(orig_bbox, aug_pred_instances.bboxes)
-                if iou_matrix.size(1) == 0:
+        for view_scale, flip in views:
+            view_inputs, view_samples = self._build_view(
+                inputs, data_samples, view_scale, flip, pad_size_divisor,
+                pad_value)
+            results = teacher.predict(view_inputs, view_samples, rescale=False)
+            if len(results) != len(data_samples):
+                raise ValueError(
+                    'Teacher predictions must match the batch size')
+
+            for i, (sample, result) in enumerate(zip(data_samples, results)):
+                instances = sample.gt_instances
+                predictions = result.pred_instances
+                if len(instances) == 0 or len(predictions) == 0:
                     continue
 
-                max_iou, match_idx = torch.max(iou_matrix, dim=1)
-                consistency = max_iou
-
-                matched_scores = aug_pred_instances.scores[match_idx]
-                matched_labels = aug_pred_instances.labels[match_idx]
+                aligned_bboxes = self._transform_bboxes(result)
+                ious = bbox_overlaps(instances.bboxes.float(), aligned_bboxes)
+                max_iou, match_idx = ious.max(dim=1)
+                orig_score = instances.scores
+                orig_labels = instances.labels
+                matched_scores = predictions.scores[match_idx]
+                matched_labels = predictions.labels[match_idx]
                 same_class_mask = (orig_labels == matched_labels)
                 score_diff = torch.where(
-                    same_class_mask,
-                    1 - (orig_score - matched_scores).abs(),
-                    torch.zeros_like(orig_score)  
-                )    
-                
-                total_consistency += consistency * score_diff
-                valid_count += 1
-            avg_consistency = total_consistency / (valid_count + 1e-7)
-            reliability =avg_consistency
-            reliability = torch.sigmoid(reliability / self.temp)
-            batch_reliability.append(reliability)
-        
-        return  batch_reliability
+                    same_class_mask, 1 - (orig_score - matched_scores).abs(),
+                    torch.zeros_like(orig_score))
+                total_consistency[i] += max_iou * score_diff
+
+        # Average over every view; missing predictions contribute zero.
+        return [
+            torch.sigmoid(consistency / len(views) / self.temp)
+            for consistency in total_consistency
+        ]

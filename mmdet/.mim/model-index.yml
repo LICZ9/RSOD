@@ -79,7 +79,6 @@ Import:
   - configs/solo/metafile.yml
   - configs/solov2/metafile.yml
   - configs/ssd/metafile.yml
-  - configs/strong_baselines/metafile.yml
   - configs/swin/metafile.yml
   - configs/tridentnet/metafile.yml
   - configs/tood/metafile.yml

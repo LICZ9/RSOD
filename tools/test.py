@@ -85,6 +85,7 @@ def main():
                                 osp.splitext(osp.basename(args.config))[0])
 
     cfg.load_from = args.checkpoint
+    cfg.resume = False
 
     if args.show or args.show_dir:
         cfg = trigger_visualization_hook(cfg, args)

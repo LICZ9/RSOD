@@ -145,7 +145,7 @@ MMDetection v2.0 经过了大规模重构并解决了许多遗留问题。 MMDet
   [model]_(model setting)_[backbone]_[neck]_(norm setting)_(misc)_(gpu x batch)_[schedule]_[dataset].py
   ```
 
-  其中 (`misc`) 包括 DCN 和 GCBlock 等。更多详细信息在 [配置文件说明文档](config.md) 中说明
+  其中 (`misc`) 包括 DCN 和 GCBlock 等。更多详细信息在 [配置文件说明文档](../user_guides/config.md) 中说明
 
 - MMDetection v2.0 使用新的 ResNet Caffe backbone 来减少加载预训练模型时的警告。新 backbone 中的大部分权重与以前的相同，但没有 `conv.bias`，且它们使用不同的 `img_norm_cfg`。因此，新的 backbone 不会报 `unexpected keys` 的警告。
 
