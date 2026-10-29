@@ -5,11 +5,13 @@
 cd RSOD
 conda create -n RSOD python=3.9.24
 conda activate RSOD
-pip install torch==2.0.0 torchvision==0.15.1 torchaudio==2.0.1 --index-url https://download.pytorch.org/whl/cu118
-pip install -r requirements.txt
-pip install -U openmim
-mim install mmengine==0.10.6
-mim install "mmcv==2.1.0"
+python -m pip install -r requirements/build.txt
+python -m pip install torch==2.0.0 torchvision==0.15.1 torchaudio==2.0.1 -c requirements/runtime.txt --index-url https://download.pytorch.org/whl/cu118
+python -m pip install -r requirements.txt
+python -m pip install -U openmim -c requirements/runtime.txt
+mim install mmengine==0.10.6 -c requirements/runtime.txt
+mim install "mmcv==2.1.0" -c requirements/runtime.txt
+python -m pip check
 ```
 
 ### FSOD Dataset
