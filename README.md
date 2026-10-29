@@ -54,8 +54,6 @@ python tools/train.py projects/RSOD/configs/FSOD10_faster-rcnn_r50_fpn_100_sonar
 Checkpoints can be evaluated in the following ways：
 ```
 python tools/test.py projects/RSOD/configs/FSOD10_faster-rcnn_r50_fpn_100_sonar-s1-p10.py work_dir/last_checkpoint.pth --out predictions.pkl
-# Get the test result indicators 
-
 ```
 
 ## Citation
