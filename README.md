@@ -12,6 +12,37 @@ mim install mmengine==0.10.6
 mim install "mmcv==2.1.0"
 ```
 
+### FSOD Dataset
+
+The FSOD dataset contains **3,929 forward-looking sonar images** covering **10 object categories**, with bounding-box annotations in **COCO JSON format**.
+
+Download: [Baidu Netdisk](https://pan.baidu.com/s/1yXjrsPkAfq8GC4Kw44qdjw?pwd=0516) | Extraction code: `0516`
+
+Organize the dataset as follows:
+
+```text
+FSOD/
+├── train/                          # Training images
+├── val/                            # Validation images
+├── test/                           # Test images
+└── annotations/
+    ├── instances_train.json
+    ├── instances_val.json
+    ├── instances_test.json
+    ├── instances_10train.json       # 10% labeled training subset
+    └── instances_10unlabeled.json   # Remaining unlabeled training subset
+```
+
+Image filenames must match the `file_name` entries in the corresponding JSON files.
+
+Set the dataset root in `projects/RSOD/configs/FSOD10_sonar_detection.py`:
+
+```python
+data_root = '/path/to/FSOD/'
+```
+
+The example training configuration uses `instances_10train.json` and `instances_10unlabeled.json`.
+
 ## Train
 Run the following sample instructions for training：
 ```
