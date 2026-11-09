@@ -16,7 +16,7 @@ python -m pip check
 
 ### FSODv2 Dataset
 
-> **Dataset update (May 2026):** We have released an updated version of the FSOD dataset with refined annotations, now named **FSODv2**. Part of the bounding boxes were revised to remove large acoustic-shadow regions. The results in the paper were obtained on the original FSOD annotations and are not directly comparable to results on FSODv2.
+> **Dataset update (May 2026):** We have released an updated version of the FSOD dataset with refined annotations, now named **FSODv2**. Object boundaries in forward-looking sonar images are often ambiguous, thus labeling them are often challenging. To provide more accurate localization labels, we revised these annotations so that the boxes fit the objects more tightly. The results reported in the paper were obtained on the original FSOD annotations and are not directly comparable to results on FSODv2.
 
 The FSODv2 dataset contains **3,929 forward-looking sonar images** covering **10 object categories**, with bounding-box annotations in **COCO JSON format**.
 
