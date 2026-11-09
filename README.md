@@ -14,16 +14,18 @@ mim install "mmcv==2.1.0" -c requirements/runtime.txt
 python -m pip check
 ```
 
-### FSOD Dataset
+### FSODv2 Dataset
 
-The FSOD dataset contains **3,929 forward-looking sonar images** covering **10 object categories**, with bounding-box annotations in **COCO JSON format**.
+> **Dataset update (May 2026):** We have released an updated version of the FSOD dataset with refined annotations, now named **FSODv2**. Part of the bounding boxes were revised to remove large acoustic-shadow regions. The results in the paper were obtained on the original FSOD annotations and are not directly comparable to results on FSODv2.
+
+The FSODv2 dataset contains **3,929 forward-looking sonar images** covering **10 object categories**, with bounding-box annotations in **COCO JSON format**.
 
 Download: [Baidu Netdisk](https://pan.baidu.com/s/1yXjrsPkAfq8GC4Kw44qdjw?pwd=0516) | Extraction code: `0516`
 
 Organize the dataset as follows:
 
 ```text
-FSOD/
+FSODv2/
 ├── train/                          # Training images
 ├── val/                            # Validation images
 ├── test/                           # Test images
@@ -40,7 +42,7 @@ Image filenames must match the `file_name` entries in the corresponding JSON fil
 Set the dataset root in `projects/RSOD/configs/FSOD10_sonar_detection.py`:
 
 ```python
-data_root = '/path/to/FSOD/'
+data_root = '/path/to/FSODv2/'
 ```
 
 The example training configuration uses `instances_10train.json` and `instances_10unlabeled.json`.
