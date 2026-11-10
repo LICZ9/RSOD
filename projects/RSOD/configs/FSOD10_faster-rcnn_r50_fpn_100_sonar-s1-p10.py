@@ -83,7 +83,7 @@ test_cfg = dict(type='TestLoop')
 # learning rate policy
 param_scheduler = [
     dict(
-        type='LinearLR', start_factor=0.25, by_epoch=False, begin=0, end=500),
+        type='LinearLR', start_factor=0.001, by_epoch=False, begin=0, end=500),
 ]
 
 # optimizer
