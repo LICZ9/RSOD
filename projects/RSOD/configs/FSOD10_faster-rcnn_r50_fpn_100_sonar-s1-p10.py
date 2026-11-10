@@ -57,7 +57,7 @@ model = dict(
         paste_occlusion_threshold=0.3,
         freeze_teacher=True,
         sup_weight=1.0,
-        unsup_weight=2.0,
+        unsup_weight=0.5,
         min_pseudo_bbox_wh=(1e-2, 1e-2)),
     semi_test_cfg=dict(predict_on='teacher'))
 
