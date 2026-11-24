@@ -20,7 +20,7 @@ python -m pip check
 
 The FSODv2 dataset contains **3,929 forward-looking sonar images** covering **10 object categories**, with bounding-box annotations in **COCO JSON format**.
 
-Download: [Baidu Netdisk](https://pan.baidu.com/s/1yXjrsPkAfq8GC4Kw44qdjw?pwd=0516) | Extraction code: `0516
+Download: [Baidu Netdisk](https://pan.baidu.com/s/1yXjrsPkAfq8GC4Kw44qdjw?pwd=0516) | Extraction code: 0516
 
 > **RSOD results on FSODv2:** To make comparison easier, we retrained RSOD on FSODv2 with **5%**, **10%**, and **20%** labeled data.
 >
@@ -32,6 +32,8 @@ Download: [Baidu Netdisk](https://pan.baidu.com/s/1yXjrsPkAfq8GC4Kw44qdjw?pwd=05
 > | 5%            | 65.3         | 64.4          |
 > | 10%           | 69.3         | 68.2          |
 > | 20%           | 72.3         | 71.5          |
+>
+>  These splits are provided for reference only, and users may also create their own splits of FSODv2. The full configuration of each run is recorded in the corresponding training log, and further tuning may lead to better results.
 
 Organize the dataset as follows:
 
