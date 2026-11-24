@@ -46,8 +46,8 @@ FSODv2/
     ├── instances_train.json
     ├── instances_val.json
     ├── instances_test.json
-    ├── instances_10train.json       # 10% labeled training subset
-    └── instances_10unlabeled.json   # Remaining unlabeled training subset
+    ├── FSODv2_10_label.json       # 10% labeled training subset
+    └── FSODv2_10_unlabel.json   # Remaining unlabeled training subset
 ```
 
 Image filenames must match the `file_name` entries in the corresponding JSON files.
